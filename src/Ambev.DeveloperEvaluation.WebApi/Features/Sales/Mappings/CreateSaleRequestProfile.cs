@@ -1,15 +1,18 @@
-using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
-using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using AutoMapper;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Mappings;
-
-public class CreateSaleRequestProfile : Profile
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Mappings
 {
-    public CreateSaleRequestProfile()
+    public class CreateSaleRequestProfile : Profile
     {
-        CreateMap<CreateSaleRequest, CreateSaleCommand>()
-            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
-        CreateMap<ItemSaleRequest, CreateSaleItemDto>();
+        public CreateSaleRequestProfile()
+        {
+            CreateMap<CreateSaleRequest, CreateSaleCommand>();
+            CreateMap<ItemSaleRequest, CreateSaleItemDto>();
+            CreateMap<ItemSaleRequest, SaleItem>();
+            CreateMap<CreateSaleResult, CreateSaleResponse>();
+        }
     }
 }

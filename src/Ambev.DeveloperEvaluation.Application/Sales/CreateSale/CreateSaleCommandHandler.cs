@@ -1,6 +1,7 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
+using AutoMapper;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
@@ -8,17 +9,17 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 /// <summary>
 /// Handler responsible for processing the CreateSaleCommand and orchestrating the business logic for sale creation.
 /// </summary>
-public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, CreateSaleResponse>
+public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, CreateSaleResult>
 {
-    private readonly AutoMapper.IMapper _mapper;
+    private readonly IMapper _mapper;
 
-    public CreateSaleCommandHandler(AutoMapper.IMapper mapper)
+    public CreateSaleCommandHandler(IMapper mapper)
     {
         //_saleRepository = saleRepository;
         _mapper = mapper;
     }
 
-    public async Task<CreateSaleResponse> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
+    public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
     {
         var sale = _mapper.Map<Sale>(command);
         sale.OrderId = new OrderId().Value;
@@ -31,6 +32,6 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
 
         //await _saleRepository.AddAsync(sale, cancellationToken);
 
-        return _mapper.Map<CreateSaleResponse>(sale);
+        return _mapper.Map<CreateSaleResult>(sale);
     }
 }

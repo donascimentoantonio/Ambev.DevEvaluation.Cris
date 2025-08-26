@@ -29,6 +29,9 @@ public class Sale : BaseEntity
     /// </summary>
     public string Agency { get; }
 
+    /// <summary>
+    /// Internal list of items in the sale. Used for encapsulation and business logic.
+    /// </summary>
     private readonly List<SaleItem> _items = [];
 
     /// <summary>
