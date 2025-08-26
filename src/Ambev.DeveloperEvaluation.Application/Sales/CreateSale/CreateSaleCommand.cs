@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Domain.ValueObjects;
+﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
@@ -9,7 +10,7 @@ public class CreateSaleCommand : IRequest<CreateSaleResponse>
 
     public string Consumer { get; set; } = string.Empty;
     public string Agency { get; set; } = string.Empty;
-    public List<CreateSaleItemDto> Items { get; set; } = [];
+    public List<SaleItem> Items { get; set; } = [];
 }
 
 public class CreateSaleItemDto

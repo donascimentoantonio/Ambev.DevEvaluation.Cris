@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Ambev.DeveloperEvaluation.Domain.Validation;
+using FluentValidation;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 /// <summary>
@@ -10,6 +11,6 @@ public class CreateSaleCommandValidator : AbstractValidator<CreateSaleCommand>
     {
         RuleFor(sale => sale.Consumer).NotEmpty();
         RuleFor(sale => sale.Agency).NotEmpty();
-        //RuleForEach(sale => sale.Items).SetValidator(new SaleItemsValidator());
+        RuleForEach(sale => sale.Items).SetValidator(new SaleItemsValidator());
     }
 }
