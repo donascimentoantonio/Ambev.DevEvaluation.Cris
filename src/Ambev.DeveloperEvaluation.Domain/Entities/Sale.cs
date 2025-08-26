@@ -1,5 +1,4 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Common;
-using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities;
@@ -12,32 +11,39 @@ public class Sale : BaseEntity
     /// <summary>
     /// Unique order identifier.
     /// </summary>
-    public string OrderId { get; set;  }
+    public string? OrderId { get; set; }
+
 
     /// <summary>
     /// Date of the sale.
     /// </summary>
-    public DateTime SaleDate { get; }
+    public DateTime? SaleDate { get; set; }
+
 
     /// <summary>
     /// Name of the customer.
     /// </summary>
-    public string Consumer { get; }
+    public string? Consumer { get; set; }
+
 
     /// <summary>
     /// Name of the agency where the sale occurred.
     /// </summary>
-    public string Agency { get; }
+    public string? Agency { get; set; }
 
     /// <summary>
     /// Internal list of items in the sale. Used for encapsulation and business logic.
     /// </summary>
-    private readonly List<SaleItem> _items = [];
+    private readonly List<SaleItem> _items = new();
+
 
     /// <summary>
     /// List of items in the sale (read-only).
     /// </summary>
     public IReadOnlyList<SaleItem> Items => _items.AsReadOnly();
+    /// <summary>
+    /// Parameterless constructor required by Entity Framework Core.
+    /// </summary>
 
     /// <summary>
     /// Total value of the sale.
@@ -82,30 +88,6 @@ public class Sale : BaseEntity
     /// Indicates if the sale has been canceled.
     /// </summary>
     public bool IsCanceled { get; private set; }
-
-    /// <summary>
-    /// Creates a new Sale instance.
-    /// </summary>
-    /// <param name="saleNumber">Unique sale number.</param>
-    /// <param name="consumer">Name of the customer.</param>
-    /// <param name="agency">Name of the agency where the sale occurred.</param>
-    /// <param name="saleDate">Date of the sale (optional, defaults to now).</param>
-    /// <exception cref="ArgumentException">Thrown if required fields are missing.</exception>
-    public Sale(OrderId orderId, string consumer, string agency, DateTime? saleDate = null)
-    {
-        if (orderId.Equals(default))
-            throw new ArgumentException("OrderId must be provided.", nameof(orderId));
-        if (string.IsNullOrWhiteSpace(consumer))
-            throw new ArgumentException("Consumer must be provided.", nameof(consumer));
-        if (string.IsNullOrWhiteSpace(agency))
-            throw new ArgumentException("Agency must be provided.", nameof(agency));
-
-        OrderId = orderId.Value;
-        Consumer = consumer;
-        Agency = agency;
-        SaleDate = saleDate ?? DateTime.UtcNow;
-        IsCanceled = false;
-    }
 
     /// <summary>
     /// Adds an item to the sale, applying discount rules and business validation.

@@ -1,4 +1,4 @@
-﻿namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales;
+﻿namespace Ambev.DeveloperEvaluation.Domain.Entities;
 
 /// <summary>
 /// Represents an item in a sale transaction.
@@ -8,50 +8,28 @@ public class SaleItem
     /// <summary>
     /// Product name or identifier.
     /// </summary>
-    public string Product { get; }
+    public string? Product { get; set; }
 
     /// <summary>
     /// Quantity of the product being sold.
     /// </summary>
-    public int Quantity { get; private set; }
+    public int Quantity { get; set; }
 
     /// <summary>
     /// Price per unit of the product.
     /// </summary>
-    public decimal Price { get; }
+    public decimal Price { get; set; }
 
     /// <summary>
     /// Discount applied to this item.
     /// </summary>
-    public decimal Discount { get; private set; }
+    public decimal Discount { get; set; }
 
     /// <summary>
     /// Total value for this item (after discount).
     /// </summary>
-    public decimal TotalValue => (Price * Quantity) - Discount;
-
-    /// <summary>
-    /// Creates a new SaleItem instance.
-    /// </summary>
-    /// <param name="product">Product name or identifier.</param>
-    /// <param name="quantity">Quantity of the product (must be > 0).</param>
-    /// <param name="price">Price per unit (must be >= 0).</param>
-    /// <exception cref="ArgumentException">Thrown if quantity or price are invalid.</exception>
-    public SaleItem(string product, int quantity, decimal price)
-    {
-        if (string.IsNullOrWhiteSpace(product))
-            throw new ArgumentException("Product name must be provided.", nameof(product));
-        if (quantity <= 0)
-            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
-        if (price < 0)
-            throw new ArgumentException("Price cannot be negative.", nameof(price));
-
-        Product = product;
-        Quantity = quantity;
-        Price = price;
-        RecalculateValues();
-    }
-
+    public decimal TotalValue => Price * Quantity - Discount;
+    
     /// <summary>
     /// Updates the quantity and recalculates discount.
     /// </summary>

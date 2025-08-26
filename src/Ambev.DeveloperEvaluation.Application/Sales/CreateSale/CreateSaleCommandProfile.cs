@@ -1,5 +1,4 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;

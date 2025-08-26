@@ -1,5 +1,5 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
+using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 using AutoMapper;
 using MediatR;
@@ -11,11 +11,12 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 /// </summary>
 public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, CreateSaleResponse>
 {
+    private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
 
-    public CreateSaleCommandHandler(IMapper mapper)
+    public CreateSaleCommandHandler(ISaleRepository saleRepository, IMapper mapper)
     {
-        //_saleRepository = saleRepository;
+        _saleRepository = saleRepository;
         _mapper = mapper;
     }
 
@@ -30,7 +31,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
             sale.AddItem(saleItem);
         }
 
-        //await _saleRepository.AddAsync(sale, cancellationToken);
+        await _saleRepository.AddAsync(sale, cancellationToken);
 
         return _mapper.Map<CreateSaleResponse>(sale);
     }
