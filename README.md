@@ -84,3 +84,33 @@ This section includes links to the detailed documentation for the different API 
 This section describes the overall structure and organization of the project files and directories. 
 
 See [Project Structure](/.doc/project-structure.md)
+
+## How to run the project locally with Docker
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd <folder-name>
+   ```
+
+2. **Install Docker and Docker Compose:**
+   - Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+3. **Start the project containers:**
+   ```powershell
+   docker-compose --project-name ambevdev up -d --build
+   ```
+
+4. **Apply database migrations:**
+   ```powershell
+   docker-compose --project-name ambevdev run --rm tools bash -c 'dotnet tool install --global dotnet-ef --version 8.* && export PATH="$PATH:/root/.dotnet/tools" && dotnet ef database update --project ./src/Ambev.DeveloperEvaluation.ORM/ --startup-project ./src/Ambev.DeveloperEvaluation.WebApi/'
+   ```
+
+5. **Access the application:**
+   - The WebApi service will be available at the port configured in docker-compose (e.g.: http://localhost:8080).
+
+6. **Notes:**
+   - To run administrative commands (such as new migrations), always use the `tools` service from docker-compose.
+   - Make sure the required ports are not being used by other services.
+
+---

@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  tools:
+    container_name: ambev_developer_evaluation_tools
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    depends_on:
+      - ambev.developerevaluation.database
+    networks:
+      - default
+    volumes:
+      - type: bind
+        source: "C:\\Users\\crist\\source\\repos\\AmbevDevEvaluation\\Ambev.DevEvaluation"
+        target: /src
+    working_dir: /src
+
   ambev.developerevaluation.webapi:
     container_name: ambev_developer_evaluation_webapi
     image: ${DOCKER_REGISTRY-}ambevdeveloperevaluationwebapi
