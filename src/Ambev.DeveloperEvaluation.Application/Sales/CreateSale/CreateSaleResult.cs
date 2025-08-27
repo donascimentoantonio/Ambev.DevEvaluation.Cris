@@ -3,7 +3,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 /// <summary>
 /// Response object for the result of creating a sale (Application layer).
 /// </summary>
-public class CreateSaleResponse
+public class CreateSaleResult
 {
     /// <summary>
     /// Unique sale number.

@@ -13,6 +13,6 @@ public class CreateSaleCommandProfile : Profile
 
 
         CreateMap<CreateSaleItemDto, SaleItem>();
-        CreateMap<Sale, CreateSaleResponse>();
+        CreateMap<Sale, CreateSaleResult>();
     }
 }
