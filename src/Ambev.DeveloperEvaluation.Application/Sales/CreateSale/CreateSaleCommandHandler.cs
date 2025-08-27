@@ -9,7 +9,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 /// <summary>
 /// Handler responsible for processing the CreateSaleCommand and orchestrating the business logic for sale creation.
 /// </summary>
-public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, CreateSaleResult>
+public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, CreateSaleResponse>
 {
     private readonly IMapper _mapper;
 
@@ -19,7 +19,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
         _mapper = mapper;
     }
 
-    public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
+    public async Task<CreateSaleResponse> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
     {
         var sale = _mapper.Map<Sale>(command);
         sale.OrderId = new OrderId().Value;
@@ -32,6 +32,6 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
 
         //await _saleRepository.AddAsync(sale, cancellationToken);
 
-        return _mapper.Map<CreateSaleResult>(sale);
+        return _mapper.Map<CreateSaleResponse>(sale);
     }
 }
