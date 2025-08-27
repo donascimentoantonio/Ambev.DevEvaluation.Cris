@@ -4,6 +4,8 @@ using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using CreateSaleResponse = Ambev.DeveloperEvaluation.Application.Sales.CreateSale.CreateSaleResponse;
+
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
 {
     [ApiController]

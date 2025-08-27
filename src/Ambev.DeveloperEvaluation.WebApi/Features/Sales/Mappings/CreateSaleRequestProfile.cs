@@ -12,7 +12,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Mappings
             CreateMap<CreateSaleRequest, CreateSaleCommand>();
             CreateMap<ItemSaleRequest, CreateSaleItemDto>();
             CreateMap<ItemSaleRequest, SaleItem>();
-            CreateMap<CreateSaleResult, CreateSaleResponse>();
+            //CreateMap<CreateSaleResult, CreateSaleResponse>();
         }
     }
 }
