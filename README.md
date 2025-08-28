@@ -1,3 +1,97 @@
+## Connecting to the Database from Visual Studio (Localhost)
+
+When running the WebApi locally (for example, using Visual Studio with IIS Express), you must use `localhost` and the mapped port for the database in your connection string.
+
+**Important (for Visual Studio/IIS Express):**
+
+1. Run the following command to check which port Postgres is mapped to on your host:
+
+   ```
+   docker-compose --project-name ambevdev ps
+   ```
+
+2. Use the command below to list all running containers and their mapped ports:
+
+   ```
+   docker-compose --project-name ambevdev ps
+   ```
+
+   Find the line with `ambev_developer_evaluation_database` and note the port before `->5432/tcp` (for example, `54387`).
+
+3. Edit your `appsettings.Development.json` file and update the `DefaultConnection` string to use this port:
+
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Host=localhost;Port=54387;Database=developer_evaluation;Username=developer;Password=ev@luAt10n"
+   }
+   ```
+   (Replace `54387` with the actual port from step 2.)
+
+This step is required so your local WebApi (when running via Visual Studio/IIS Express) can connect to the Postgres database running in Docker. If you change the mapped port, always update the configuration accordingly.
+# Recommended Development Workflow with Visual Studio and Docker
+
+To develop and test in Visual Studio using Docker for the database (without table errors due to missing migrations), follow this workflow:
+
+1. **Start Docker containers (including the database):**
+   ```powershell
+   docker-compose --project-name ambevdev up -d --build
+   ```
+
+2. **Apply database migrations using the tools service:**
+   ```powershell
+   docker-compose --project-name ambevdev run --rm tools bash -c 'dotnet tool install --global dotnet-ef --version 8.* && export PATH="$PATH:/root/.dotnet/tools" && dotnet ef database update --project ./src/Ambev.DeveloperEvaluation.ORM/ --startup-project ./src/Ambev.DeveloperEvaluation.WebApi/'
+   ```
+
+3. **Keep the database container running at all times.**
+
+4. **In Visual Studio, configure your WebApi connection string** to point to the Docker database container (host: `database`, port: the one exposed in docker-compose).
+
+5. **Run and debug the WebApi project in Visual Studio as usual.** You will not get table errors, since the migration has already been applied.
+
+6. **If you change the model or need a new migration,** generate the migration and repeat step 2.
+
+This workflow ensures you can develop and test in Visual Studio, using the persistent Docker database, without losing data or encountering missing table errors.
+## How to run Visual Studio locally using Docker database (without losing volumes)
+
+If you want to debug or run the WebApi project in Visual Studio, but keep your database and other services running in Docker (without losing data), follow these steps:
+
+1. **Stop only the WebApi container (keep the database running):**
+   ```powershell
+   docker-compose stop ambev.developerevaluation.webapi
+   ```
+2. **Keep the database and other containers running.**
+
+3. **Configure your connection string in Visual Studio** to point to the Docker database container. Use the hostname of the service (e.g., `database`) and the mapped port (check with `docker ps`). Example:
+   - Host: `localhost` or the Docker network IP
+   - Port: (the port mapped to Postgres, e.g., `65485`)
+   - User/Password: as defined in your `docker-compose.yml`
+
+4. **Run the WebApi project in Visual Studio** (F5 or Debug). Your API will run locally, but will use the database in Docker, keeping all data persistent.
+
+**Note:**
+- Do not use `docker-compose down --volumes` unless you want to delete all data.
+- You can restart the WebApi container anytime with:
+  ```powershell
+  docker-compose up -d ambev.developerevaluation.webapi
+  ```
+## Stopping all containers
+
+To stop all containers started by docker-compose, run:
+
+```
+docker-compose --project-name ambevdev down
+```
+
+This will stop and remove all containers, networks, and by default, keep the volumes (database data will be preserved unless you add the `-v` flag).
+## Checking if migrations were applied successfully
+
+After running the migration command, you can check if the tables were created correctly by executing:
+
+```
+docker exec -it ambev_developer_evaluation_database psql -U developer -d developer_evaluation -c '\dt'
+```
+
+The result should list the created tables, such as `Sales`, `SaleItem`, `Users`, etc.
 # Developer Evaluation Project
 
 `READ CAREFULLY`
@@ -101,10 +195,17 @@ See [Project Structure](/.doc/project-structure.md)
    docker-compose --project-name ambevdev up -d --build
    ```
 
+
 4. **Apply database migrations:**
    ```powershell
    docker-compose --project-name ambevdev run --rm tools bash -c 'dotnet tool install --global dotnet-ef --version 8.* && export PATH="$PATH:/root/.dotnet/tools" && dotnet ef database update --project ./src/Ambev.DeveloperEvaluation.ORM/ --startup-project ./src/Ambev.DeveloperEvaluation.WebApi/'
    ```
+
+   > **Validated command:**
+   >
+   > To ensure the migration runs correctly in the Docker environment, use exactly the command above. It installs dotnet-ef in the session, exports the PATH, and runs the migration using the correct projects.
+   >
+   > **Important:** Always run migrations using the `tools` service from Docker Compose, as only it has the required .NET SDK. The WebApi container uses only the runtime and cannot run the migration command.
 
 5. **Access the application:**
    - The WebApi service will be available at the port configured in docker-compose (e.g.: http://localhost:8080).
@@ -112,5 +213,7 @@ See [Project Structure](/.doc/project-structure.md)
 6. **Notes:**
    - To run administrative commands (such as new migrations), always use the `tools` service from docker-compose.
    - Make sure the required ports are not being used by other services.
+
+---
 
 ---
