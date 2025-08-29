@@ -5,9 +5,9 @@ using FluentAssertions;
 using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities;
+
 public class SaleTests
 {
-    #region Business Rules
     [Fact(DisplayName = "Should sum quantity for duplicate product, up to 20 units")]
     public void AddItem_DuplicateProduct_ShouldSumQuantityUpToLimit()
     {
@@ -51,7 +51,6 @@ public class SaleTests
         sale.AddItem(SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(15).WithPrice(price).Build());
         sale.Discounts.Should().Be(15 * price * 0.20m);
     }
-    #endregion
 
     [Fact(DisplayName = "Cancel should mark sale as canceled")]
     public void Cancel_ShouldSetIsCanceled()
@@ -112,5 +111,26 @@ public class SaleTests
         sale.AddItem(item);
         sale.RemoveItem(item);
         sale.Items.Should().BeEmpty();
+    }
+
+    [Fact(DisplayName = "Should not allow negative quantity")]
+    public void AddItem_WithNegativeQuantity_ShouldThrow()
+    {
+        var sale = new Sale();
+        var faker = new Bogus.Faker();
+        var item = SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(-1).WithPrice(faker.Random.Decimal(1, 100)).Build();
+        Action act = () => sale.AddItem(item);
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact(DisplayName = "Should not allow null product name")]
+    public void AddItem_WithNullProduct_ShouldThrow()
+    {
+        var sale = new Sale();
+        var faker = new Bogus.Faker();
+        string? nullProduct = null;
+        var item = SaleItemBuilder.New().WithProduct(nullProduct!).WithQuantity(1).WithPrice(faker.Random.Decimal(1, 100)).Build();
+        Action act = () => sale.AddItem(item);
+        act.Should().Throw<ArgumentException>();
     }
 }
