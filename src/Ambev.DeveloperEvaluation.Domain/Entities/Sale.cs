@@ -1,17 +1,26 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Common;
+﻿using Ambev.DeveloperEvaluation.Common;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities;
 
-/// <summary>
-/// Represents a sales transaction in the system.
-/// </summary>
 public class Sale : BaseEntity
 {
     /// <summary>
+    /// Removes an item from the sale.
+    /// </summary>
+    /// <summary>
     /// Unique order identifier.
     /// </summary>
-    public string SaleNumber { get; set; }
+    public string SaleNumber { get; set; } = string.Empty;
+    /// <summary>
+    /// Removes an item from the sale.
+    /// </summary>
+    public void RemoveItem(SaleItem item)
+    {
+        if (item == null) throw new ArgumentNullException(nameof(item));
+        _items.Remove(item);
+
+    }
 
 
     /// <summary>
@@ -96,8 +105,13 @@ public class Sale : BaseEntity
     /// <param name="item">The item to add.</param>
     public void AddItem(SaleItem item)
     {
+
         if (item == null)
             throw new ArgumentNullException(nameof(item));
+        if (item.Quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(item.Quantity));
+        if (string.IsNullOrWhiteSpace(item.Product))
+            throw new ArgumentException("Product name cannot be null or empty.", nameof(item.Product));
         if (item.Quantity > 20)
             throw new InvalidOperationException("Cannot sell more than 20 identical items.");
 
@@ -129,10 +143,5 @@ public class Sale : BaseEntity
     /// Cancels the sale.
     /// </summary>
     public void Cancel() => IsCanceled = true;
-
-    /// <summary>
-    /// Reverses the cancelation of the sale.
-    /// </summary>
-    public void Reactivate() => IsCanceled = false;
 }
 
