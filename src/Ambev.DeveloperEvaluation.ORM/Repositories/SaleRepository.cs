@@ -18,6 +18,14 @@ public class SaleRepository : ISaleRepository
         _context = context;
     }
 
+    // Método privado reutilizável para buscar Sale por SaleNumber
+    private async Task<Sale?> GetSaleBySaleNumberAsync(string saleNumber, CancellationToken cancellationToken = default)
+    {
+        return await _context.Sales
+            .Include(s => s.Items)
+            .FirstOrDefaultAsync(s => s.SaleNumber == saleNumber, cancellationToken);
+    }
+
     public async Task<Sale> UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
     {
         _context.Sales.Update(sale);
@@ -27,7 +35,7 @@ public class SaleRepository : ISaleRepository
 
     public async Task<bool> DeleteAsync(SaleNumber saleNumber, CancellationToken cancellationToken = default)
     {
-        var sale = await _context.Sales.FirstOrDefaultAsync(s => s.SaleNumber == saleNumber.Value, cancellationToken);
+        var sale = await GetSaleBySaleNumberAsync(saleNumber.Value, cancellationToken);
         if (sale == null)
             return false;
         _context.Sales.Remove(sale);
@@ -62,14 +70,12 @@ public class SaleRepository : ISaleRepository
 
     public async Task<Sale?> GetBySaleNumberAsync(string saleNumber, CancellationToken cancellationToken = default)
     {
-        return await _context.Sales
-            .Include(s => s.Items)
-            .FirstOrDefaultAsync(s => s.SaleNumber == saleNumber, cancellationToken);
+        return await GetSaleBySaleNumberAsync(saleNumber, cancellationToken);
     }
 
     public async Task<Sale?> CancelAsync(SaleNumber SaleNumber, CancellationToken cancellationToken = default)
     {
-        var sale = await GetBySaleNumberAsync(SaleNumber.Value, cancellationToken);
+        var sale = await GetSaleBySaleNumberAsync(SaleNumber.Value, cancellationToken);
         if (sale == null)
             return null;
         sale.Cancel();
