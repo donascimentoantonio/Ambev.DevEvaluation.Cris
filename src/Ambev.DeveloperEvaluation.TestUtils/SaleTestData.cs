@@ -11,6 +11,21 @@ namespace Ambev.DeveloperEvaluation.TestUtils;
 /// </summary>
 public static class SaleTestData
 {
+    /// <summary>
+    /// Gera uma venda customizada para testes, permitindo definir consumidor e data.
+    /// </summary>
+    /// <param name="consumer">Nome do consumidor</param>
+    /// <param name="saleDate">Data da venda</param>
+    /// <param name="agency">Agência (opcional)</param>
+    /// <returns>Instância de Sale</returns>
+    public static Sale GenerateCustomSale(string consumer, DateTime saleDate, string? agency = null)
+    {
+        var sale = GenerateSale();
+        sale.Consumer = consumer;
+        typeof(Sale).GetProperty("SaleDate")?.SetValue(sale, saleDate);
+        if (agency != null) sale.Agency = agency;
+        return sale;
+    }
     private static readonly Faker<SaleItem> itemFaker = new Faker<SaleItem>()
         .RuleFor(i => i.Product, f => f.Commerce.ProductName())
         .RuleFor(i => i.Quantity, f => f.Random.Int(1, 20))

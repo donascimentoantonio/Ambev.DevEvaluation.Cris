@@ -2,6 +2,7 @@
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
 
@@ -105,18 +106,31 @@ public class SaleRepository : ISaleRepository
         if (!string.IsNullOrWhiteSpace(consumer))
             query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, "%" + consumer + "%"));
 
-        query = sortBy?.ToLower() switch
+        if (!string.IsNullOrWhiteSpace(sortBy))
         {
-            "consumer" => query.OrderBy(s => s.Consumer),
-            "consumer_desc" => query.OrderByDescending(s => s.Consumer),
-            "agency" => query.OrderBy(s => s.Agency),
-            "agency_desc" => query.OrderByDescending(s => s.Agency),
-            "salenumber" => query.OrderBy(s => s.SaleNumber),
-            "salenumber_desc" => query.OrderByDescending(s => s.SaleNumber),
-            "saledate" => query.OrderBy(s => s.SaleDate),
-            "saledate_desc" => query.OrderByDescending(s => s.SaleDate),
-            _ => query.OrderByDescending(s => s.SaleDate)
-        };
+            var orderString = string.Join(",",
+                sortBy.Split(',')
+                    .Select(o => {
+                        var parts = o.Trim().Split(' ');
+                        var field = parts[0];
+                        var direction = parts.Length > 1 ? parts[1] : "asc";
+                        switch (field.ToLower())
+                        {
+                            case "consumer": field = "Consumer"; break;
+                            case "agency": field = "Agency"; break;
+                            case "salenumber": field = "SaleNumber"; break;
+                            case "saledate": field = "SaleDate"; break;
+                            default: field = "SaleDate"; direction = "desc"; break;
+                        }
+                        return $"{field} {direction}";
+                    })
+            );
+            query = query.OrderBy(orderString);
+        }
+        else
+        {
+            query = query.OrderByDescending(s => s.SaleDate);
+        }
 
         query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
         return await query.ToListAsync(cancellationToken);
