@@ -10,6 +10,8 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
+using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -134,6 +136,32 @@ public class SalesController : ControllerBase
             Message = result ? "Sale deleted successfully." : "Sale not found or could not be deleted."
         };
         return Ok(new ApiResponseWithData<DeleteSaleResponse>
+        {
+            Success = result,
+            Message = response.Message,
+            Data = response
+        });
+    }
+
+    /// <summary>
+    /// Updates a sale by SaleNumber
+    /// </summary>
+    /// <param name="request">The sale update request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result of the update operation</returns>
+    [HttpPut]
+    [ProducesResponseType(typeof(ApiResponseWithData<UpdateSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateSale([FromBody] UpdateSaleRequest request, CancellationToken cancellationToken)
+    {
+        var command = _mapper.Map<UpdateSaleCommand>(request);
+        var result = await _mediator.Send(command, cancellationToken);
+        var response = new UpdateSaleResponse
+        {
+            Success = result,
+            Message = result ? "Sale updated successfully." : "Sale not found or could not be updated."
+        };
+        return Ok(new ApiResponseWithData<UpdateSaleResponse>
         {
             Success = result,
             Message = response.Message,
