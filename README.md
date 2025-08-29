@@ -324,5 +324,34 @@ See [Project Structure](/.doc/project-structure.md)
    - Make sure the required ports are not being used by other services.
 
 ---
+# Example: Domain Event Logging
 
----
+When a sale is created, updated, or cancelled, the system logs the event with the full sale payload in JSON format. Example log entries:
+
+```
+[INF] SaleCreatedIntegrationEvent: Sale created. Payload: {
+  "SaleNumber": "S-20250829-001",
+  "SaleDate": "2025-08-29T10:15:00Z",
+  "Consumer": "John Doe",
+  "Agency": "Main Branch",
+  "Items": [
+    { "Product": "Beer", "Quantity": 10, "Price": 5.99 },
+    { "Product": "Soda", "Quantity": 2, "Price": 3.50 }
+  ]
+}
+
+[INF] SaleCancelledIntegrationEvent: Sale cancelled. Payload: {
+  "SaleNumber": "S-20250829-001",
+  "SaleDate": "2025-08-29T10:15:00Z",
+  "Consumer": "John Doe",
+  "Agency": "Main Branch",
+  "Items": [
+    { "Product": "Beer", "Quantity": 10, "Price": 5.99 },
+    { "Product": "Soda", "Quantity": 2, "Price": 3.50 }
+  ]
+}
+```
+
+- The log includes the event type and the full sale object.
+- The payload is automatically serialized to JSON by the logger.
+- This helps with auditing and debugging domain events.
