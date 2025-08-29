@@ -18,4 +18,10 @@ public class GetSalesRequest
 
     [FromQuery(Name = "_order")]
     public string? Order { get; set; }
+
+    [FromQuery(Name = "consumer")]
+    public string[]? Consumer { get; set; }
+
+    [FromQuery(Name = "agency")]
+    public string[]? Agency { get; set; }
 }

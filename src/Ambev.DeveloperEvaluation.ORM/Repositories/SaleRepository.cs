@@ -43,7 +43,7 @@ public class SaleRepository : ISaleRepository
         return true;
     }
 
-    public async Task<int> CountAsync(string? filter, CancellationToken cancellationToken = default)
+    public async Task<int> CountAsync(string? filter, string[]? consumer, string[]? agency, CancellationToken cancellationToken = default)
     {
         var query = _context.Sales.AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter))
@@ -54,6 +54,31 @@ public class SaleRepository : ISaleRepository
                 (s.SaleNumber != null && EF.Functions.ILike(s.SaleNumber, "%" + filter + "%"))
             );
         }
+
+        if (consumer != null && consumer.Length > 0)
+        {
+            foreach (var cons in consumer)
+            {
+                if (!string.IsNullOrWhiteSpace(cons))
+                {
+                    var pattern = cons.Replace("*", "%");
+                    query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, pattern));
+                }
+            }
+        }
+
+        if (agency != null && agency.Length > 0)
+        {
+            foreach (var ag in agency)
+            {
+                if (!string.IsNullOrWhiteSpace(ag))
+                {
+                    var pattern = ag.Replace("*", "%");
+                    query = query.Where(s => s.Agency != null && EF.Functions.ILike(s.Agency, pattern));
+                }
+            }
+        }
+
         return await query.CountAsync(cancellationToken);
     }
 
@@ -80,7 +105,7 @@ public class SaleRepository : ISaleRepository
         return sale;
     }
 
-    public async Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, CancellationToken cancellationToken = default)
+    public async Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, string[]? consumer, string[]? agency, CancellationToken cancellationToken = default)
     {
         if (pageNumber < 1) pageNumber = 1;
         if (pageSize < 1) pageSize = 10;
@@ -98,11 +123,42 @@ public class SaleRepository : ISaleRepository
             );
         }
 
-        if (!string.IsNullOrWhiteSpace(sortBy))
+        // Filtro avançado para Consumer
+        if (consumer != null && consumer.Length > 0)
+        {
+            foreach (var cons in consumer)
+            {
+                if (!string.IsNullOrWhiteSpace(cons))
+                {
+                    var pattern = cons.Replace("*", "%");
+                    query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, pattern));
+                }
+            }
+        }
+
+        // Filtro avançado para Agency
+        if (agency != null && agency.Length > 0)
+        {
+            foreach (var ag in agency)
+            {
+                if (!string.IsNullOrWhiteSpace(ag))
+                {
+                    var pattern = ag.Replace("*", "%");
+                    query = query.Where(s => s.Agency != null && EF.Functions.ILike(s.Agency, pattern));
+                }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(sortBy))
+        {
+            query = query.OrderByDescending(s => s.SaleDate);
+        }
+        else
         {
             var orderString = string.Join(",",
                 sortBy.Split(',')
-                    .Select(o => {
+                    .Select(o =>
+                    {
                         var parts = o.Trim().Split(' ');
                         var field = parts[0];
                         var direction = parts.Length > 1 ? parts[1] : "asc";
@@ -118,10 +174,6 @@ public class SaleRepository : ISaleRepository
                     })
             );
             query = query.OrderBy(orderString);
-        }
-        else
-        {
-            query = query.OrderByDescending(s => s.SaleDate);
         }
 
         query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);

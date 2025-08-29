@@ -14,7 +14,7 @@ public interface ISaleRepository
     /// <param name="filter">Filter string (optional).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Total count of sales matching the filter.</returns>
-    Task<int> CountAsync(string? filter, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(string? filter, string[]? consumer, string[]? agency, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new sale in the repository.
@@ -44,7 +44,7 @@ public interface ISaleRepository
     /// <param name="sortBy">Sort by property (optional).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A paginated, filtered and sorted list of sales.</returns>
-    Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, CancellationToken cancellationToken = default);
+    Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, string[]? consumer, string[]? agency, CancellationToken cancellationToken = default);
 
 
     /// <summary>
