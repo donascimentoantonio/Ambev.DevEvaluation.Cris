@@ -43,7 +43,7 @@ public class SaleRepository : ISaleRepository
         return true;
     }
 
-    public async Task<int> CountAsync(string? filter, string? saleNumber = null, string? consumer = null, CancellationToken cancellationToken = default)
+    public async Task<int> CountAsync(string? filter, CancellationToken cancellationToken = default)
     {
         var query = _context.Sales.AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter))
@@ -54,10 +54,6 @@ public class SaleRepository : ISaleRepository
                 (s.SaleNumber != null && EF.Functions.ILike(s.SaleNumber, "%" + filter + "%"))
             );
         }
-        if (!string.IsNullOrWhiteSpace(saleNumber))
-            query = query.Where(s => s.SaleNumber == saleNumber);
-        if (!string.IsNullOrWhiteSpace(consumer))
-            query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, "%" + consumer + "%"));
         return await query.CountAsync(cancellationToken);
     }
 
@@ -84,7 +80,7 @@ public class SaleRepository : ISaleRepository
         return sale;
     }
 
-    public async Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, string? saleNumber = null, string? consumer = null, CancellationToken cancellationToken = default)
+    public async Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, CancellationToken cancellationToken = default)
     {
         if (pageNumber < 1) pageNumber = 1;
         if (pageSize < 1) pageSize = 10;
@@ -101,10 +97,6 @@ public class SaleRepository : ISaleRepository
                 (s.SaleNumber != null && EF.Functions.ILike(s.SaleNumber, "%" + filter + "%"))
             );
         }
-        if (!string.IsNullOrWhiteSpace(saleNumber))
-            query = query.Where(s => s.SaleNumber == saleNumber);
-        if (!string.IsNullOrWhiteSpace(consumer))
-            query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, "%" + consumer + "%"));
 
         if (!string.IsNullOrWhiteSpace(sortBy))
         {

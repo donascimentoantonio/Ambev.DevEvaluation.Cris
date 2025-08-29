@@ -35,8 +35,6 @@ public class SaleIntegrationTests
             pageSize: 10,
             filter: null,
             sortBy: "Consumer desc,SaleDate asc",
-            saleNumber: null,
-            consumer: null,
             cancellationToken: default
         );
         Assert.Equal(5, result.Count);

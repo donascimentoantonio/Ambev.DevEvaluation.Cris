@@ -20,8 +20,8 @@ public class GetSalesHandler : IRequestHandler<GetSalesCommand, GetSalesResult>
 
     public async Task<GetSalesResult> Handle(GetSalesCommand request, CancellationToken cancellationToken)
     {
-        var sales = await _saleRepository.GetAllAsync(request.PageNumber, request.PageSize, request.Filter, request.SortBy, request.SaleNumber, request.Consumer, cancellationToken);
-        var totalCount = await _saleRepository.CountAsync(request.Filter, request.SaleNumber, request.Consumer, cancellationToken);
+    var sales = await _saleRepository.GetAllAsync(request.PageNumber, request.PageSize, request.Filter, request.Order, cancellationToken);
+    var totalCount = await _saleRepository.CountAsync(request.Filter, cancellationToken);
 
         return new GetSalesResult
         {

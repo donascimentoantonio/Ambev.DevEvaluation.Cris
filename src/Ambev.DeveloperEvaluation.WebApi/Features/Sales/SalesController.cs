@@ -96,16 +96,10 @@ public class SalesController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponseWithData<GetSalesResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetSales(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? filter = null,
-        [FromQuery] string? sortBy = null,
-        [FromQuery] string? saleNumber = null,
-        [FromQuery] string? consumer = null,
+    public async Task<IActionResult> GetSales([
+        FromQuery] GetSalesRequest request,
         CancellationToken cancellationToken = default)
     {
-        var request = new GetSalesRequest(pageNumber, pageSize, filter, sortBy, saleNumber, consumer);
         var command = _mapper.Map<GetSalesCommand>(request);
         var result = await _mediator.Send(command, cancellationToken);
 
