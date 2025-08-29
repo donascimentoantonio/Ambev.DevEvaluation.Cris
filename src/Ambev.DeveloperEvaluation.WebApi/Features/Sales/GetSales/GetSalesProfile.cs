@@ -11,7 +11,9 @@ public class GetSalesProfile : Profile
     public GetSalesProfile()
     {
     CreateMap<GetSalesRequest, GetSalesCommand>()
-        .ForMember(dest => dest.Order, opt => opt.MapFrom(src => src._order));
+        .ForMember(dest => dest.PageNumber, opt => opt.MapFrom(src => src.Page))
+        .ForMember(dest => dest.PageSize, opt => opt.MapFrom(src => src.Size))
+        .ForMember(dest => dest.Order, opt => opt.MapFrom(src => src.Order));
         CreateMap<GetSalesResult, GetSalesResponse>();
         CreateMap<SaleDto, SaleItemResponse>()
             .ForMember(dest => dest.SaleNumber, opt => opt.MapFrom(src => src.SaleNumber))

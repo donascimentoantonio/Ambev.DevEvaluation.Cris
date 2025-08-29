@@ -96,8 +96,7 @@ public class SalesController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponseWithData<GetSalesResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetSales([
-        FromQuery] GetSalesRequest request,
+    public async Task<IActionResult> GetSales([FromQuery] GetSalesRequest request,
         CancellationToken cancellationToken = default)
     {
         var command = _mapper.Map<GetSalesCommand>(request);
@@ -107,7 +106,7 @@ public class SalesController : ControllerBase
         {
             Success = true,
             Message = "Sales retrieved successfully.",
-            Data = (GetSalesResult)result
+            Data = result
         });
     }
 
