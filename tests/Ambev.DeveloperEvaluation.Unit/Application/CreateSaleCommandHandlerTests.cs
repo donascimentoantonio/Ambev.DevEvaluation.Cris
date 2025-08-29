@@ -16,26 +16,22 @@ public class CreateSaleCommandHandlerTests
         var saleRepository = Substitute.For<ISaleRepository>();
         var mapper = Substitute.For<IMapper>();
         var mediator = Substitute.For<MediatR.IMediator>();
-    var eventDispatcher = Substitute.For<Ambev.DeveloperEvaluation.Application.Events.IEventDispatcher>();
+        var eventDispatcher = Substitute.For<Ambev.DeveloperEvaluation.Application.Events.IEventDispatcher>();
         var handler = new CreateSaleCommandHandler(saleRepository, mapper, mediator, eventDispatcher);
         var fixedSaleNumber = "TEST123";
-        var sale = new Sale { SaleNumber = fixedSaleNumber };
-        var faker = new Bogus.Faker();
         var items = new List<SaleItem> {
-            new() {
-                Product = faker.Commerce.ProductName(),
-                Quantity = faker.Random.Int(1, 5),
-                Price = faker.Random.Decimal(1, 100)
-            }
+            Domain.Entities.TestData.SaleItemBuilder.New()
+                .WithProduct("Product X")
+                .WithQuantity(2)
+                .WithPrice(50m)
+                .Build()
         };
-        var command = new CreateSaleCommand
-        {
-            Consumer = faker.Name.FullName(),
-            Agency = faker.Company.CompanyName(),
-            Items = items
-        };
-        sale.Consumer = command.Consumer;
-        sale.Agency = command.Agency;
+        var command = Application.TestData.CreateSaleCommandBuilder.New()
+            .WithConsumer("John Doe")
+            .WithAgency("Agency Y")
+            .WithItems(items)
+            .Build();
+        var sale = new Sale { SaleNumber = fixedSaleNumber, Consumer = command.Consumer, Agency = command.Agency };
         saleRepository.AddAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>()).Returns(sale);
         mapper.Map<Sale>(command).Returns(sale);
         mapper.Map<List<SaleItem>>(command.Items).Returns(items);
