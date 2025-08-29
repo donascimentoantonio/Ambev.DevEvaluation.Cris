@@ -1,17 +1,18 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Common;
+﻿using Ambev.DeveloperEvaluation.Common;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities;
 
-/// <summary>
-/// Represents a sales transaction in the system.
-/// </summary>
 public class Sale : BaseEntity
 {
     /// <summary>
     /// Unique order identifier.
     /// </summary>
     public string SaleNumber { get; set; }
+    public Sale()
+    {
+        SaleNumber = new SaleNumber().Value;
+    }
 
 
     /// <summary>
@@ -42,9 +43,6 @@ public class Sale : BaseEntity
     /// List of items in the sale (read-only).
     /// </summary>
     public IReadOnlyList<SaleItem> Items => _items.AsReadOnly();
-    /// <summary>
-    /// Parameterless constructor required by Entity Framework Core.
-    /// </summary>
 
     /// <summary>
     /// Total value of the sale.
@@ -96,8 +94,12 @@ public class Sale : BaseEntity
     /// <param name="item">The item to add.</param>
     public void AddItem(SaleItem item)
     {
-        if (item == null)
-            throw new ArgumentNullException(nameof(item));
+
+        ArgumentNullException.ThrowIfNull(item);
+        if (item.Quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(item.Quantity));
+        if (string.IsNullOrWhiteSpace(item.Product))
+            throw new ArgumentException("Product name must be provided.", nameof(item.Product));
         if (item.Quantity > 20)
             throw new InvalidOperationException("Cannot sell more than 20 identical items.");
 
@@ -134,5 +136,14 @@ public class Sale : BaseEntity
     /// Reverses the cancelation of the sale.
     /// </summary>
     public void Reactivate() => IsCanceled = false;
+
+    /// <summary>
+    /// Removes a specific item from the sale.
+    /// </summary>
+    public void RemoveItem(SaleItem item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        _items.Remove(item);
+    }
 }
 
