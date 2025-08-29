@@ -2,6 +2,7 @@
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
 
@@ -42,7 +43,7 @@ public class SaleRepository : ISaleRepository
         return true;
     }
 
-    public async Task<int> CountAsync(string? filter, string? saleNumber = null, string? consumer = null, CancellationToken cancellationToken = default)
+    public async Task<int> CountAsync(string? filter, string[]? consumer, string[]? agency, CancellationToken cancellationToken = default)
     {
         var query = _context.Sales.AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter))
@@ -53,10 +54,31 @@ public class SaleRepository : ISaleRepository
                 (s.SaleNumber != null && EF.Functions.ILike(s.SaleNumber, "%" + filter + "%"))
             );
         }
-        if (!string.IsNullOrWhiteSpace(saleNumber))
-            query = query.Where(s => s.SaleNumber == saleNumber);
-        if (!string.IsNullOrWhiteSpace(consumer))
-            query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, "%" + consumer + "%"));
+
+        if (consumer != null && consumer.Length > 0)
+        {
+            foreach (var cons in consumer)
+            {
+                if (!string.IsNullOrWhiteSpace(cons))
+                {
+                    var pattern = cons.Replace("*", "%");
+                    query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, pattern));
+                }
+            }
+        }
+
+        if (agency != null && agency.Length > 0)
+        {
+            foreach (var ag in agency)
+            {
+                if (!string.IsNullOrWhiteSpace(ag))
+                {
+                    var pattern = ag.Replace("*", "%");
+                    query = query.Where(s => s.Agency != null && EF.Functions.ILike(s.Agency, pattern));
+                }
+            }
+        }
+
         return await query.CountAsync(cancellationToken);
     }
 
@@ -83,7 +105,7 @@ public class SaleRepository : ISaleRepository
         return sale;
     }
 
-    public async Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, string? saleNumber = null, string? consumer = null, CancellationToken cancellationToken = default)
+    public async Task<List<Sale>> GetAllAsync(int pageNumber, int pageSize, string? filter, string? sortBy, string[]? consumer, string[]? agency, CancellationToken cancellationToken = default)
     {
         if (pageNumber < 1) pageNumber = 1;
         if (pageSize < 1) pageSize = 10;
@@ -100,23 +122,59 @@ public class SaleRepository : ISaleRepository
                 (s.SaleNumber != null && EF.Functions.ILike(s.SaleNumber, "%" + filter + "%"))
             );
         }
-        if (!string.IsNullOrWhiteSpace(saleNumber))
-            query = query.Where(s => s.SaleNumber == saleNumber);
-        if (!string.IsNullOrWhiteSpace(consumer))
-            query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, "%" + consumer + "%"));
 
-        query = sortBy?.ToLower() switch
+        // Filtro avançado para Consumer
+        if (consumer != null && consumer.Length > 0)
         {
-            "consumer" => query.OrderBy(s => s.Consumer),
-            "consumer_desc" => query.OrderByDescending(s => s.Consumer),
-            "agency" => query.OrderBy(s => s.Agency),
-            "agency_desc" => query.OrderByDescending(s => s.Agency),
-            "salenumber" => query.OrderBy(s => s.SaleNumber),
-            "salenumber_desc" => query.OrderByDescending(s => s.SaleNumber),
-            "saledate" => query.OrderBy(s => s.SaleDate),
-            "saledate_desc" => query.OrderByDescending(s => s.SaleDate),
-            _ => query.OrderByDescending(s => s.SaleDate)
-        };
+            foreach (var cons in consumer)
+            {
+                if (!string.IsNullOrWhiteSpace(cons))
+                {
+                    var pattern = cons.Replace("*", "%");
+                    query = query.Where(s => s.Consumer != null && EF.Functions.ILike(s.Consumer, pattern));
+                }
+            }
+        }
+
+        // Filtro avançado para Agency
+        if (agency != null && agency.Length > 0)
+        {
+            foreach (var ag in agency)
+            {
+                if (!string.IsNullOrWhiteSpace(ag))
+                {
+                    var pattern = ag.Replace("*", "%");
+                    query = query.Where(s => s.Agency != null && EF.Functions.ILike(s.Agency, pattern));
+                }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(sortBy))
+        {
+            query = query.OrderByDescending(s => s.SaleDate);
+        }
+        else
+        {
+            var orderString = string.Join(",",
+                sortBy.Split(',')
+                    .Select(o =>
+                    {
+                        var parts = o.Trim().Split(' ');
+                        var field = parts[0];
+                        var direction = parts.Length > 1 ? parts[1] : "asc";
+                        switch (field.ToLower())
+                        {
+                            case "consumer": field = "Consumer"; break;
+                            case "agency": field = "Agency"; break;
+                            case "salenumber": field = "SaleNumber"; break;
+                            case "saledate": field = "SaleDate"; break;
+                            default: field = "SaleDate"; direction = "desc"; break;
+                        }
+                        return $"{field} {direction}";
+                    })
+            );
+            query = query.OrderBy(orderString);
+        }
 
         query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
         return await query.ToListAsync(cancellationToken);
