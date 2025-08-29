@@ -5,9 +5,11 @@ using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSales;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.DeleteSale;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -110,6 +112,32 @@ public class SalesController : ControllerBase
             Success = true,
             Message = "Sales retrieved successfully.",
             Data = (GetSalesResult)result
+        });
+    }
+
+    /// <summary>
+    /// Deletes a sale by SaleNumber
+    /// </summary>
+    /// <param name="request">The sale delete request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result of the delete operation</returns>
+    [HttpDelete]
+    [ProducesResponseType(typeof(ApiResponseWithData<DeleteSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteSale([FromBody] DeleteSaleRequest request, CancellationToken cancellationToken)
+    {
+        var command = _mapper.Map<DeleteSaleCommand>(request);
+        var result = await _mediator.Send(command, cancellationToken);
+        var response = new DeleteSaleResponse
+        {
+            Success = result,
+            Message = result ? "Sale deleted successfully." : "Sale not found or could not be deleted."
+        };
+        return Ok(new ApiResponseWithData<DeleteSaleResponse>
+        {
+            Success = result,
+            Message = response.Message,
+            Data = response
         });
     }
 }

@@ -18,7 +18,6 @@ public class SaleRepository : ISaleRepository
         _context = context;
     }
 
-    // Método privado reutilizável para buscar Sale por SaleNumber
     private async Task<Sale?> GetSaleBySaleNumberAsync(string saleNumber, CancellationToken cancellationToken = default)
     {
         return await _context.Sales
