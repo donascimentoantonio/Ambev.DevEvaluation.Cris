@@ -16,7 +16,7 @@ public class SaleCreatedEventHandler : INotificationHandler<SaleCreatedIntegrati
     }
     public Task Handle(SaleCreatedIntegrationEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"SaleCreatedIntegrationEvent: Sale created with SaleNumber={notification.Sale.SaleNumber}");
+    _logger.LogInformation("SaleCreatedIntegrationEvent: Sale created. Payload: {@Sale}", notification.Sale);
         return Task.CompletedTask;
     }
 }

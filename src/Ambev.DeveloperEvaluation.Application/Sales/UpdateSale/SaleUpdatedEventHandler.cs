@@ -16,7 +16,7 @@ public class SaleUpdatedEventHandler : INotificationHandler<SaleUpdatedIntegrati
     }
     public Task Handle(SaleUpdatedIntegrationEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"SaleUpdatedIntegrationEvent: Sale updated with SaleNumber={notification.Sale.SaleNumber}");
+    _logger.LogInformation("SaleUpdatedIntegrationEvent: Sale updated. Payload: {@Sale}", notification.Sale);
         return Task.CompletedTask;
     }
 }
