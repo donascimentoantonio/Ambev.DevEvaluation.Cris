@@ -6,6 +6,9 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities;
 
+/// <summary>
+/// Contains unit tests for the <see cref="Sale"/> entity business rules and logic.
+/// </summary>
 public class SaleTests
 {
     [Fact(DisplayName = "Should sum quantity for duplicate product, up to 20 units")]

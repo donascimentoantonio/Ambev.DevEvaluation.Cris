@@ -5,6 +5,9 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities;
 
+/// <summary>
+/// Contains unit tests for the <see cref="Sale"/> entity validation logic.
+/// </summary>
 public class SaleValidationTests
 {
     [Fact(DisplayName = "Should not allow negative quantity")]

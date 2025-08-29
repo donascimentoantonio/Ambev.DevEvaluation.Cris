@@ -5,6 +5,9 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities;
 
+/// <summary>
+/// Contains unit tests for the <see cref="User"/> entity validation logic.
+/// </summary>
 public class UserValidationTests
 {
     [Fact(DisplayName = "Validation should pass for valid user data")]

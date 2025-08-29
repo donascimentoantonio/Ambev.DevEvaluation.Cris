@@ -7,6 +7,9 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
+/// <summary>
+/// Contains unit tests for the <see cref="CreateSaleCommandHandler"/> class.
+/// </summary>
 public class CreateSaleCommandHandlerTests
 {
     [Fact(DisplayName = "Should create sale and return result")]
