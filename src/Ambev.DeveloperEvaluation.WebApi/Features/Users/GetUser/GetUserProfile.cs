@@ -14,5 +14,8 @@ public class GetUserProfile : Profile
     {
         CreateMap<Guid, Application.Users.GetUser.GetUserCommand>()
             .ConstructUsing(id => new Application.Users.GetUser.GetUserCommand(id));
+
+        // Corrige o erro de mapping do AutoMapper
+        CreateMap<Application.Users.GetUser.GetUserResult, GetUserResponse>();
     }
 }
