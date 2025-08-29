@@ -17,7 +17,6 @@ public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, bool>
 
     public async Task<bool> Handle(DeleteSaleCommand request, CancellationToken cancellationToken)
     {
-        // Tenta obter a venda antes de excluir para passar ao evento
         var sale = await _saleRepository.GetBySaleNumberAsync(request.SaleNumber, cancellationToken);
         var result = await _saleRepository.DeleteAsync(new Domain.ValueObjects.SaleNumber(request.SaleNumber), cancellationToken);
 
