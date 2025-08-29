@@ -17,7 +17,8 @@ public class Sale : BaseEntity
     /// <summary>
     /// Date of the sale.
     /// </summary>
-    public DateTime? SaleDate { get; set; }
+    public DateTime SaleDate { get; private set; }
+
 
 
     /// <summary>

@@ -1,3 +1,52 @@
+> **Note:**
+> The HTTPS port for the WebApi container is dynamically assigned each time you run Docker Compose, unless you set a fixed port in your docker-compose.yml. Always check the current port with:
+>
+> ```
+> docker-compose --project-name ambevdev ps
+> ```
+>
+> Then access the API in Postman or your browser using the format:
+>
+> `https://127.0.0.1:<WebApiHttpsPort>/`
+>
+> For example, if the mapped port is 62770, use:
+>
+> `https://127.0.0.1:62770/`
+
+# Quick Start: Running, Migrating, and Testing the API
+
+Follow these steps to run the project with Docker, apply migrations, and test the API:
+
+1. **Start all containers (WebApi, database, etc):**
+   ```powershell
+   docker-compose --project-name ambevdev up -d --build
+   ```
+
+2. **Apply database migrations:**
+   ```powershell
+   docker-compose --project-name ambevdev run --rm tools bash -c 'dotnet tool install --global dotnet-ef --version 8.* && export PATH="$PATH:/root/.dotnet/tools" && dotnet ef database update --project ./src/Ambev.DeveloperEvaluation.ORM/ --startup-project ./src/Ambev.DeveloperEvaluation.WebApi/'
+   ```
+
+3. **Test the API:**
+   - **Swagger:**
+     - Open your browser and go to: `http://localhost:<WebApiPort>/swagger` (replace `<WebApiPort>` with the mapped port, e.g., 55105)
+     - Use the Swagger UI to explore and test endpoints interactively.
+   - **Postman:**
+     - Make requests to: `http://localhost:<WebApiPort>/api/<YourEndpoint>` (e.g., `http://localhost:55105/api/Sales`)
+     - For HTTPS, use the mapped HTTPS port (e.g., 55106): `https://localhost:55106/api/Sales`
+     - If you get a redirect (307), use the HTTPS URL and accept the self-signed certificate if prompted.
+
+4. **Check logs (optional):**
+   ```powershell
+   docker logs ambev_developer_evaluation_webapi
+   ```
+
+5. **Stop all containers:**
+   ```powershell
+   docker-compose --project-name ambevdev down
+   ```
+
+This workflow ensures your environment is up, the database is migrated, and you can test the API via Swagger or Postman.
 ## Connecting to the Database from Visual Studio (Localhost)
 
 When running the WebApi locally (for example, using Visual Studio with IIS Express), you must use `localhost` and the mapped port for the database in your connection string.
