@@ -1,13 +1,10 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Common;
+﻿using Ambev.DeveloperEvaluation.Common;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities;
 
-/// <summary>
-/// Represents a sales transaction in the system.
-/// </summary>
 public class Sale : BaseEntity
-{   
+{
     /// <summary>
     /// Unique order identifier.
     /// </summary>
@@ -46,9 +43,6 @@ public class Sale : BaseEntity
     /// List of items in the sale (read-only).
     /// </summary>
     public IReadOnlyList<SaleItem> Items => _items.AsReadOnly();
-    /// <summary>
-    /// Parameterless constructor required by Entity Framework Core.
-    /// </summary>
 
     /// <summary>
     /// Total value of the sale.

@@ -15,7 +15,9 @@ public class CreateSaleCommandHandlerTests
         // Arrange
         var saleRepository = Substitute.For<ISaleRepository>();
         var mapper = Substitute.For<IMapper>();
-        var handler = new CreateSaleCommandHandler(saleRepository, mapper);
+        var mediator = Substitute.For<MediatR.IMediator>();
+    var eventDispatcher = Substitute.For<Ambev.DeveloperEvaluation.Application.Events.IEventDispatcher>();
+        var handler = new CreateSaleCommandHandler(saleRepository, mapper, mediator, eventDispatcher);
         var fixedSaleNumber = "TEST123";
         var sale = new Sale { SaleNumber = fixedSaleNumber };
         var faker = new Bogus.Faker();
