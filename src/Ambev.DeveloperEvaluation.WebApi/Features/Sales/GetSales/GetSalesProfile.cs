@@ -16,7 +16,11 @@ public class GetSalesProfile : Profile
             .ForMember(dest => dest.Order, opt => opt.MapFrom(src => src.Order))
             .ForMember(dest => dest.Consumer, opt => opt.MapFrom(src => src.Consumer))
             .ForMember(dest => dest.Agency, opt => opt.MapFrom(src => src.Agency));
-        CreateMap<GetSalesResult, GetSalesResponse>();
+        CreateMap<GetSalesResult, GetSalesResponse>()
+            .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Sales))
+            .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalCount))
+            .ForMember(dest => dest.CurrentPage, opt => opt.MapFrom(src => src.PageNumber))
+            .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => (src.TotalCount + src.PageSize - 1) / src.PageSize));
         CreateMap<SaleDto, SaleItemResponse>()
             .ForMember(dest => dest.SaleNumber, opt => opt.MapFrom(src => src.SaleNumber))
             .ForMember(dest => dest.SaleDate, opt => opt.MapFrom(src => src.DataSale))

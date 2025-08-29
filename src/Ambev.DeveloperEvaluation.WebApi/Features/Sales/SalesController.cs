@@ -101,12 +101,13 @@ public class SalesController : ControllerBase
     {
         var command = _mapper.Map<GetSalesCommand>(request);
         var result = await _mediator.Send(command, cancellationToken);
+        var response = _mapper.Map<GetSalesResponse>(result);
 
-        return Ok(new ApiResponseWithData<GetSalesResult>
+        return Ok(new ApiResponseWithData<GetSalesResponse>
         {
             Success = true,
             Message = "Sales retrieved successfully.",
-            Data = result
+            Data = response
         });
     }
 
