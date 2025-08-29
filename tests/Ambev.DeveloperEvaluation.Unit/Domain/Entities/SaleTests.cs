@@ -7,11 +7,11 @@ using Xunit;
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities;
 public class SaleTests
 {
-#region Business Rules
+    #region Business Rules
     [Fact(DisplayName = "Should sum quantity for duplicate product, up to 20 units")]
     public void AddItem_DuplicateProduct_ShouldSumQuantityUpToLimit()
     {
-        var sale = SaleTestData.GenerateSaleWithItems(0);
+        var sale = new Sale();
         var faker = new Bogus.Faker();
         var product = faker.Commerce.ProductName();
         var price = faker.Random.Decimal(1, 100);
@@ -28,7 +28,7 @@ public class SaleTests
     [Fact(DisplayName = "Should throw when adding more than 20 items of the same product")]
     public void AddItem_MoreThanTwentyItems_ShouldThrow()
     {
-        var sale = SaleTestData.GenerateSaleWithItems(0);
+        var sale = new Sale();
         var faker = new Bogus.Faker();
         var product = faker.Commerce.ProductName();
         var item = SaleItemBuilder.New().WithProduct(product).WithQuantity(21).WithPrice(faker.Random.Decimal(1, 100)).Build();
@@ -39,7 +39,7 @@ public class SaleTests
     [Fact(DisplayName = "Should calculate correct discount for quantity ranges")]
     public void Discounts_ShouldBeCorrectForRanges()
     {
-        var sale = SaleTestData.GenerateSaleWithItems(0);
+        var sale = new Sale();
         var faker = new Bogus.Faker();
         var price = faker.Random.Decimal(1, 100);
         sale.AddItem(SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(3).WithPrice(price).Build());
@@ -51,12 +51,12 @@ public class SaleTests
         sale.AddItem(SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(15).WithPrice(price).Build());
         sale.Discounts.Should().Be(15 * price * 0.20m);
     }
-#endregion
+    #endregion
 
     [Fact(DisplayName = "Cancel should mark sale as canceled")]
     public void Cancel_ShouldSetIsCanceled()
     {
-        var sale = SaleTestData.GenerateSale();
+        var sale = new Sale();
         sale.IsCanceled.Should().BeFalse();
         sale.Cancel();
         sale.IsCanceled.Should().BeTrue();
@@ -65,7 +65,9 @@ public class SaleTests
     [Fact(DisplayName = "Should clear all items")]
     public void ClearItems_ShouldRemoveAllItems()
     {
-        var sale = SaleTestData.GenerateSaleWithItems(3);
+        var sale = new Sale();
+        for (int i = 0; i < 3; i++)
+            sale.AddItem(SaleItemBuilder.New().WithProduct($"Product{i}").WithQuantity(1).WithPrice(10).Build());
         sale.Items.Should().NotBeEmpty();
         sale.ClearItems();
         sale.Items.Should().BeEmpty();
@@ -84,7 +86,9 @@ public class SaleTests
     [Fact(DisplayName = "Should create sale with valid data")]
     public void CreateSale_WithValidData_ShouldSucceed()
     {
-        var sale = SaleTestData.GenerateSale();
+        var sale = new Sale();
+        sale.Consumer = "Test Consumer";
+        sale.Agency = "Test Agency";
         sale.SaleNumber.Should().NotBeNullOrWhiteSpace();
         sale.Consumer.Should().NotBeNullOrWhiteSpace();
         sale.Agency.Should().NotBeNullOrWhiteSpace();
@@ -94,8 +98,8 @@ public class SaleTests
     [Fact(DisplayName = "Should add item to sale")]
     public void AddItem_ShouldAddSaleItem()
     {
-        var sale = SaleTestData.GenerateSaleWithItems(0);
-        var item = SaleTestData.GenerateSaleWithItems(1).Items[0];
+        var sale = new Sale();
+        var item = SaleItemBuilder.New().WithProduct("Test").WithQuantity(1).WithPrice(10).Build();
         sale.AddItem(item);
         sale.Items.Should().Contain(item);
     }
@@ -103,8 +107,9 @@ public class SaleTests
     [Fact(DisplayName = "Should remove item from sale")]
     public void RemoveItem_ShouldRemoveSaleItem()
     {
-        var sale = SaleTestData.GenerateSaleWithItems(1);
-        var item = sale.Items[0];
+        var sale = new Sale();
+        var item = SaleItemBuilder.New().WithProduct("Test").WithQuantity(1).WithPrice(10).Build();
+        sale.AddItem(item);
         sale.RemoveItem(item);
         sale.Items.Should().BeEmpty();
     }

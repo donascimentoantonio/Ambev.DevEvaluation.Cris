@@ -1,9 +1,7 @@
-using Ambev.DeveloperEvaluation.Application.Events;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
+using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
-using MediatR;
 using NSubstitute;
 using Xunit;
 
@@ -11,40 +9,42 @@ namespace Ambev.DeveloperEvaluation.Unit.Application;
 
 public class CreateSaleCommandHandlerTests
 {
-    [Fact(DisplayName = "Should dispatch SaleCreatedEvent when sale is created")]
-    public async Task Handle_ShouldDispatchSaleCreatedEvent()
+    [Fact(DisplayName = "Should create sale and return result")]
+    public async Task Handle_ShouldCreateSaleAndReturnResult()
     {
         // Arrange
-    var saleRepository = Substitute.For<Ambev.DeveloperEvaluation.Domain.Repositories.ISaleRepository>();
+        var saleRepository = Substitute.For<ISaleRepository>();
         var mapper = Substitute.For<IMapper>();
-        var mediator = Substitute.For<IMediator>();
-        var eventDispatcher = Substitute.For<IEventDispatcher>();
-        var handler = new CreateSaleCommandHandler(saleRepository, mapper, mediator, eventDispatcher);
-        var sale = SaleTestData.GenerateSale();
+        var handler = new CreateSaleCommandHandler(saleRepository, mapper);
+        var fixedSaleNumber = "TEST123";
+        var sale = new Sale { SaleNumber = fixedSaleNumber };
         var faker = new Bogus.Faker();
         var items = new List<SaleItem> {
-            new SaleItem {
+            new() {
                 Product = faker.Commerce.ProductName(),
                 Quantity = faker.Random.Int(1, 5),
                 Price = faker.Random.Decimal(1, 100)
             }
         };
-        var command = new CreateSaleCommand {
+        var command = new CreateSaleCommand
+        {
             Consumer = faker.Name.FullName(),
             Agency = faker.Company.CompanyName(),
             Items = items
         };
-        // Setup repository and mapper mocks as needed
+        sale.Consumer = command.Consumer;
+        sale.Agency = command.Agency;
         saleRepository.AddAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>()).Returns(sale);
         mapper.Map<Sale>(command).Returns(sale);
         mapper.Map<List<SaleItem>>(command.Items).Returns(items);
+        var expectedResult = new CreateSaleResult { SaleNumber = fixedSaleNumber, Consumer = sale.Consumer ?? string.Empty, TotalValue = sale.TotalValue, Discounts = sale.Discounts };
+        mapper.Map<CreateSaleResult>(sale).Returns(expectedResult);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await eventDispatcher.Received(1).DispatchAsync(
-            Arg.Is<Ambev.DeveloperEvaluation.Domain.Events.SaleCreatedEvent>(e => e.Sale.Id == sale.Id),
-            Arg.Any<CancellationToken>());
+        Assert.NotNull(result);
+        Assert.Equal(command.Consumer, result.Consumer);
     }
 }
