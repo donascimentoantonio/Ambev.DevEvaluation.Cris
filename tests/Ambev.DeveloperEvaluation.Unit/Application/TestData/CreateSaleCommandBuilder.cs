@@ -5,6 +5,10 @@ using Bogus;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.TestData;
 
+/// <summary>
+/// Provides a fluent builder for creating CreateSaleCommand instances for tests.
+/// Allows customization of consumer, agency, and items to generate valid or edge-case commands for handler tests.
+/// </summary>
 public class CreateSaleCommandBuilder
 {
     private string _consumer = new Faker().Name.FullName();

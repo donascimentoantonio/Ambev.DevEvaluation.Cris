@@ -2,6 +2,10 @@ using Ambev.DeveloperEvaluation.Domain.Entities;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 
+/// <summary>
+/// Provides a fluent builder for creating SaleItem instances for tests.
+/// Allows customization of product name, quantity, and price to generate valid or edge-case SaleItem objects.
+/// </summary>
 public class SaleItemBuilder
 {
     private string _product = "Default Product";
