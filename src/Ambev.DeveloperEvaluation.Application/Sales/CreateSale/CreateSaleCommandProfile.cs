@@ -8,7 +8,7 @@ public class CreateSaleCommandProfile : Profile
     public CreateSaleCommandProfile()
     {
         CreateMap<CreateSaleCommand, Sale>()
-            .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId.Value))
+            .ForMember(dest => dest.SaleNumber, opt => opt.MapFrom(src => src.SaleNumber.Value))
             .ForMember(dest => dest.Items, opt => opt.Ignore());
 
 

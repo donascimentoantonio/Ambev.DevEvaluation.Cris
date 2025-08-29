@@ -3,21 +3,21 @@ namespace Ambev.DeveloperEvaluation.Domain.ValueObjects;
 /// <summary>
 /// Value Object representing a unique order identifier.
 /// </summary>
-public readonly struct OrderId
+public readonly struct SaleNumber
 {
     public string Value { get; }
 
-    public OrderId()
+    public SaleNumber()
     {
-        Value = GenerateOrderId();
+        Value = GenerateSaleNumber();
     }
 
-    public OrderId(string value)
+    public SaleNumber(string value)
     {
         Value = value;
     }
 
-    private static string GenerateOrderId()
+    private static string GenerateSaleNumber()
     {
         var random = new Random();
         return random.Next(1000000, 9999999).ToString();

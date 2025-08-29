@@ -37,13 +37,14 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     b.Property<bool>("IsCanceled")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("OrderId")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("SaleDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("SaleNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

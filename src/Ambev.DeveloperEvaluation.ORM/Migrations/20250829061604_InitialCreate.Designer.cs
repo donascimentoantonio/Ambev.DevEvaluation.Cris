@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     [DbContext(typeof(DefaultContext))]
-    [Migration("20250829031236_SaleDateDefaultValue")]
-    partial class SaleDateDefaultValue
+    [Migration("20250829061604_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,13 +40,14 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     b.Property<bool>("IsCanceled")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("OrderId")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("SaleDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("SaleNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

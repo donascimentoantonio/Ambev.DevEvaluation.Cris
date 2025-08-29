@@ -23,7 +23,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
     public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
     {
         var sale = _mapper.Map<Sale>(command);
-        sale.OrderId = new OrderId().Value;
+        sale.SaleNumber = new SaleNumber().Value;
 
         var saleItems = _mapper.Map<List<SaleItem>>(command.Items);
         foreach (var saleItem in saleItems)

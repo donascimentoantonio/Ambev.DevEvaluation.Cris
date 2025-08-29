@@ -11,7 +11,7 @@ public class Sale : BaseEntity
     /// <summary>
     /// Unique order identifier.
     /// </summary>
-    public string? OrderId { get; set; }
+    public string SaleNumber { get; set; }
 
 
     /// <summary>

@@ -1,3 +1,63 @@
+# Resetting Migrations and Database (for breaking changes)
+
+If you need to reset the migration history and database (for example, after renaming columns or making breaking changes in your models), follow these steps:
+
+1. **Delete all migration files:**
+   Delete all files in the folder:
+   ```
+   src/Ambev.DeveloperEvaluation.ORM/Migrations/
+   ```
+
+2. **Drop all tables and reset the schema:**
+   Run this command to drop all tables and recreate the schema (this will erase all data!):
+   ```powershell
+   docker exec -i ambev_developer_evaluation_database psql -U developer -d developer_evaluation -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+   ```
+
+3. **Generate a new initial migration:**
+   ```powershell
+   dotnet ef migrations add InitialCreate --project ./src/Ambev.DeveloperEvaluation.ORM/ --startup-project ./src/Ambev.DeveloperEvaluation.WebApi/
+   ```
+
+4. **Apply the migration to the database:**
+   ```powershell
+   dotnet ef database update --project ./src/Ambev.DeveloperEvaluation.ORM/ --startup-project ./src/Ambev.DeveloperEvaluation.WebApi/ --connection "Host=localhost;Port=<mapped_port>;Database=developer_evaluation;Username=developer;Password=ev@luAt10n"
+   ```
+   Replace `<mapped_port>` with the port mapped to Postgres as shown in `docker ps` or `docker-compose ps` (e.g., 60277).
+
+**When to use this:**
+- If you changed property/column names in your models and did a global replace (e.g., OrderId → SaleNumber),
+- If you get migration errors about missing columns or tables,
+- If you want a clean start for your database and migrations.
+
+**Warning:** This process will erase all data in the database. Only use it in development environments!
+# Running Migration Locally (using mapped port)
+
+If you need to apply migrations directly from your host (for example, when the Docker tools container cannot resolve the database service name), use the following command with the mapped port:
+
+```powershell
+dotnet ef database update --project ./src/Ambev.DeveloperEvaluation.ORM/ --startup-project ./src/Ambev.DeveloperEvaluation.WebApi/ --connection "Host=localhost;Port=60277;Database=developer_evaluation;Username=developer;Password=ev@luAt10n"
+```
+
+Replace `60277` with the port mapped to Postgres as shown in `docker ps` or `docker-compose ps`.
+
+**Description:**
+This command forces the connection string to use your local machine's mapped port for the Postgres container, ensuring migrations are applied even if the Docker network name resolution fails. Use this if you can connect to the database with DBeaver or another tool using `localhost:<mapped_port>`, but migrations via Docker are not working.
+# Note on Connection Strings for Migrations
+
+When running migrations via Docker (tools container), use this connection string in your appsettings or as an environment variable:
+
+```
+Host=ambev.developerevaluation.database;Port=5432;Database=developer_evaluation;Username=developer;Password=ev@luAt10n
+```
+
+When running locally (Visual Studio/IIS), use:
+
+```
+Host=localhost;Port=<mapped_port>;Database=developer_evaluation;Username=developer;Password=ev@luAt10n
+```
+
+Replace `<mapped_port>` with the port shown in `docker-compose ps`.
 > **Note:**
 > The HTTPS port for the WebApi container is dynamically assigned each time you run Docker Compose, unless you set a fixed port in your docker-compose.yml. Always check the current port with:
 >
@@ -59,7 +119,7 @@ When running the WebApi locally (for example, using Visual Studio with IIS Expre
    docker-compose --project-name ambevdev ps
    ```
 
-2. Use the command below to list all running containers and their mapped ports:
+2. Use the command below to list all running containers and their mapped ports:SELECT * FROM "Sales";
 
    ```
    docker-compose --project-name ambevdev ps

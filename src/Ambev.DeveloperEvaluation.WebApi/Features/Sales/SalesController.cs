@@ -1,6 +1,10 @@
+using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
+using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
-using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSales;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +33,7 @@ public class SalesController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponseWithData<CreateSaleResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateSale([FromBody] CreateSaleRequest request, CancellationToken cancellationToken)
     {
         var validator = new CreateSaleRequestValidator();
@@ -45,6 +50,66 @@ public class SalesController : ControllerBase
             Success = true,
             Message = "Sale created successfully",
             Data = _mapper.Map<CreateSaleResponse>(response)
+        });
+    }
+
+    /// <summary>
+    /// Retrieves a sale by their ID
+    /// </summary>
+    /// <param name="SaleNumber">The unique identifier of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale details if found</returns>
+    [HttpGet("{SaleNumber}")]
+    [ProducesResponseType(typeof(ApiResponseWithData<GetSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetSaleById([FromRoute] string SaleNumber, CancellationToken cancellationToken)
+    {
+        var request = new GetSaleRequest { SaleNumber = SaleNumber };
+        var validator = new GetSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var command = _mapper.Map<GetSaleCommand>(request.SaleNumber);
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return Ok(new ApiResponseWithData<GetSaleResponse>
+        {
+            Success = true,
+            Message = "Sale data retrieved successfully",
+            Data = _mapper.Map<GetSaleResponse>(response)
+        });
+    }
+
+    /// <summary>
+    /// Retrieves a paginated, filterable, and sortable list of sales
+    /// </summary>
+    /// <param name="request">The sales query parameters</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Paginated sales data</returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(ApiResponseWithData<GetSalesResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetSales(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? filter = null,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? saleNumber = null,
+        [FromQuery] string? consumer = null,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new GetSalesRequest(pageNumber, pageSize, filter, sortBy, saleNumber, consumer);
+        var command = _mapper.Map<GetSalesCommand>(request);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        return Ok(new ApiResponseWithData<GetSalesResult>
+        {
+            Success = true,
+            Message = "Sales retrieved successfully.",
+            Data = (GetSalesResult)result
         });
     }
 }
