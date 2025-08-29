@@ -18,13 +18,6 @@ public class DefaultContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        modelBuilder.Entity<Sale>().OwnsMany(v => v.Items);
-
-        modelBuilder.Entity<Sale>()
-            .Property(s => s.SaleDate)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
         base.OnModelCreating(modelBuilder);
     }
 }
