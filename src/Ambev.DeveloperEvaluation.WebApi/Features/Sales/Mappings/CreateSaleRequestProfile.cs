@@ -11,7 +11,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.Mappings
         {
             CreateMap<CreateSaleRequest, CreateSaleCommand>();
             CreateMap<ItemSaleRequest, CreateSaleItemDto>();
-            CreateMap<ItemSaleRequest, SaleItem>();
+            CreateMap<ItemSaleRequest, SaleItem>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product));
             CreateMap<CreateSaleResult, CreateSaleResponse>();
         }
     }

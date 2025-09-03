@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     [DbContext(typeof(DefaultContext))]
-    [Migration("20250829061604_InitialCreate")]
+    [Migration("20250903020807_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -121,11 +121,18 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                             b1.Property<decimal>("Price")
                                 .HasColumnType("numeric");
 
-                            b1.Property<string>("Product")
+                            b1.Property<string>("ProductId")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("ProductName")
                                 .HasColumnType("text");
 
                             b1.Property<int>("Quantity")
                                 .HasColumnType("integer");
+
+                            b1.Property<string>("SaleNumber")
+                                .IsRequired()
+                                .HasColumnType("text");
 
                             b1.HasKey("SaleId", "Id");
 

@@ -54,7 +54,9 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     SaleId = table.Column<Guid>(type: "uuid", nullable: false),
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Product = table.Column<string>(type: "text", nullable: true),
+                    SaleNumber = table.Column<string>(type: "text", nullable: false),
+                    ProductId = table.Column<string>(type: "text", nullable: true),
+                    ProductName = table.Column<string>(type: "text", nullable: true),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     Discount = table.Column<decimal>(type: "numeric", nullable: false)
