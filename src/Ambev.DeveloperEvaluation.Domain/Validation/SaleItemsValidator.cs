@@ -7,27 +7,27 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
     {
         public SaleItemsValidator()
         {
-            RuleFor(item => item.Product)
+            RuleFor(item => item.ProductId)
                 .NotEmpty()
-                .WithMessage("O nome do produto é obrigatório.");
+                .WithMessage("Product name is required.");
 
             RuleFor(item => item.Quantity)
                 .GreaterThan(0)
-                .WithMessage("A quantidade deve ser maior que 0.")
+                .WithMessage("Quantity must be greater than 0.")
                 .LessThanOrEqualTo(20)
-                .WithMessage("A quantidade não pode exceder 20 unidades.");
+                .WithMessage("Quantity cannot exceed 20 units.");
 
             RuleFor(item => item.Price)
                 .GreaterThan(0)
-                .WithMessage("O preço unitário deve ser maior que 0.");
+                .WithMessage("Unit price must be greater than 0.");
 
             RuleFor(item => item.Discount)
                 .Must(ValidateDiscount)
-                .WithMessage("O desconto aplicado é inválido para a quantidade informada.");
+                .WithMessage("The applied discount is invalid for the given quantity.");
 
             RuleFor(item => item.TotalValue)
-                .Must(ValidarTotalValue)
-                .WithMessage("O valor total do item está incorreto.");
+                .Must(ValidateTotalValue)
+                .WithMessage("The item total value is incorrect.");
         }
 
         private bool ValidateDiscount(SaleItem item, decimal desconto)
@@ -43,9 +43,9 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
             return desconto == descontoEsperado;
         }
 
-        private bool ValidarTotalValue(SaleItem item, decimal totalValue)
+        private bool ValidateTotalValue(SaleItem item, decimal totalValue)
         {
-            decimal descontoCalculado = item.Quantity switch
+            decimal calculatedDiscount = item.Quantity switch
             {
                 <= 3 => 0, // no discount
                 <= 9 => item.Quantity * item.Price * 0.10m, // 10%
@@ -53,7 +53,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
                 _ => 0
             };
 
-            return totalValue == (item.Quantity * item.Price) - descontoCalculado;
+            return totalValue == (item.Quantity * item.Price) - calculatedDiscount;
         }
     }
 }

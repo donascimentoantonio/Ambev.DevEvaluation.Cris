@@ -7,10 +7,10 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSales;
 /// </summary>
 public class GetSalesResponse
 {
-    public List<SaleItemResponse> Sales { get; set; } = [];
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public int TotalCount { get; set; }
+    public List<SaleItemResponse> Data { get; set; } = [];
+    public int TotalItems { get; set; }
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
 }
 
 public class SaleItemResponse

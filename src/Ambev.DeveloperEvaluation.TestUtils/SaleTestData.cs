@@ -2,7 +2,7 @@ using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 using Bogus;
 
-namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
+namespace Ambev.DeveloperEvaluation.TestUtils;
 
 /// <summary>
 /// Provides methods for generating test data for Sale entities using the Bogus library.
@@ -11,20 +11,32 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 /// </summary>
 public static class SaleTestData
 {
-    public static string GenerateProductId() => Guid.NewGuid().ToString();
+    /// <summary>
+    /// Gera uma venda customizada para testes, permitindo definir consumidor e data.
+    /// </summary>
+    /// <param name="consumer">Nome do consumidor</param>
+    /// <param name="saleDate">Data da venda</param>
+    /// <param name="agency">Agência (opcional)</param>
+    /// <returns>Instância de Sale</returns>
+    public static Sale GenerateCustomSale(string consumer, DateTime saleDate, string? agency = null)
+    {
+        var sale = GenerateSale();
+        sale.Consumer = consumer;
+        typeof(Sale).GetProperty("SaleDate")?.SetValue(sale, saleDate);
+        if (agency != null) sale.Agency = agency;
+        return sale;
+    }
     private static readonly Faker<SaleItem> itemFaker = new Faker<SaleItem>()
-        .RuleFor(i => i.ProductId, _ => GenerateProductId())
+        .RuleFor(i => i.SaleNumber, f => new SaleNumber().Value)
+        .RuleFor(i => i.ProductId, f => Guid.NewGuid().ToString())
         .RuleFor(i => i.ProductName, f => f.Commerce.ProductName())
         .RuleFor(i => i.Quantity, f => f.Random.Int(1, 20))
         .RuleFor(i => i.Price, f => f.Random.Decimal(1, 100));
-
     private static readonly Faker<Sale> saleFaker = new Faker<Sale>()
         .CustomInstantiator(f =>
         {
-            var sale = new Sale
-            {
-                SaleNumber = new SaleNumber().Value
-            };
+            var sale = new Sale();
+            sale.SaleNumber = new SaleNumber().Value;
             typeof(Sale).GetProperty("SaleDate")?.SetValue(sale, f.Date.PastOffset(1).UtcDateTime);
             sale.Consumer = f.Name.FullName();
             sale.Agency = f.Company.CompanyName();
@@ -65,6 +77,7 @@ public static class SaleTestData
     {
         var sale = saleFaker.Generate();
         sale.ClearItems();
+
         for (int i = 0; i < itemCount; i++)
             sale.AddItem(itemFaker.Generate());
         return sale;

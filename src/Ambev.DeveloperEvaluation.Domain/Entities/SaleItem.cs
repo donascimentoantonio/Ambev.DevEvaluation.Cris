@@ -5,10 +5,33 @@
 /// </summary>
 public class SaleItem
 {
+    public SaleItem() { }
+
+    public SaleItem(string saleNumber, string productId, string? productName, int quantity, decimal price, decimal discount = 0)
+    {
+        if (string.IsNullOrWhiteSpace(productName))
+            throw new ArgumentException("ProductName is required.", nameof(productName));
+        SaleNumber = saleNumber;
+        ProductId = productId;
+        ProductName = productName;
+        Quantity = quantity;
+        Price = price;
+        Discount = discount;
+    }
     /// <summary>
-    /// Product name or identifier.
+    /// Sale identifier.
     /// </summary>
-    public string? Product { get; set; }
+    public string SaleNumber { get; set; }
+    
+    /// <summary>
+    /// Product identifier.
+    /// </summary>
+    public string? ProductId { get; set; }
+
+    /// <summary>
+    /// Product name - denormalization for easier access.
+    /// </summary>
+    public string? ProductName { get; set; }
 
     /// <summary>
     /// Quantity of the product being sold.

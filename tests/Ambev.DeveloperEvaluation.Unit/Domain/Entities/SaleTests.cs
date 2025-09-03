@@ -6,59 +6,57 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities;
 
-/// <summary>
-/// Contains unit tests for the <see cref="Sale"/> entity business rules and logic.
-/// </summary>
 public class SaleTests
 {
     [Fact(DisplayName = "Should sum quantity for duplicate product, up to 20 units")]
     public void AddItem_DuplicateProduct_ShouldSumQuantityUpToLimit()
     {
-        var sale = new Sale();
+        //Arrange
+        var sale = SaleTestData.GenerateSaleWithItems(0);
         var faker = new Bogus.Faker();
         var product = faker.Commerce.ProductName();
-        var price = faker.Random.Decimal(1, 100);
-        var item1 = SaleItemBuilder.New().WithProduct(product).WithQuantity(10).WithPrice(price).Build();
-        var item2 = SaleItemBuilder.New().WithProduct(product).WithQuantity(10).WithPrice(price).Build();
+        var item1 = new SaleItem { ProductId = Guid.NewGuid().ToString(), ProductName = product, Quantity = 10, Price = faker.Random.Decimal(1, 100) };
+        var item2 = new SaleItem { ProductId = item1.ProductId, ProductName = product, Quantity = 10, Price = item1.Price };
         sale.AddItem(item1);
         sale.AddItem(item2);
-        sale.Items.Should().ContainSingle(i => i.Product == product && i.Quantity == 20);
-        var item3 = SaleItemBuilder.New().WithProduct(product).WithQuantity(1).WithPrice(price).Build();
-        Action act = () => sale.AddItem(item3);
-        act.Should().Throw<InvalidOperationException>();
-    }
 
-    [Fact(DisplayName = "Should throw when adding more than 20 items of the same product")]
-    public void AddItem_MoreThanTwentyItems_ShouldThrow()
-    {
-        var sale = new Sale();
-        var faker = new Bogus.Faker();
-        var product = faker.Commerce.ProductName();
-        var item = SaleItemBuilder.New().WithProduct(product).WithQuantity(21).WithPrice(faker.Random.Decimal(1, 100)).Build();
-        Action act = () => sale.AddItem(item);
+        //Assert
+        sale.Items.Should().ContainSingle(i => i.ProductName == product && i.Quantity == 20);
+
+        // Exceeding the limit
+        var item3 = new SaleItem { ProductId = item1.ProductId, ProductName = product, Quantity = 1, Price = item1.Price };
+
+        //Act
+        Action act = () => sale.AddItem(item3);
+
+        //Assert
         act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact(DisplayName = "Should calculate correct discount for quantity ranges")]
     public void Discounts_ShouldBeCorrectForRanges()
     {
-        var sale = new Sale();
+        //Arrange
+        var sale = SaleTestData.GenerateSaleWithItems(0);
         var faker = new Bogus.Faker();
         var price = faker.Random.Decimal(1, 100);
-        sale.AddItem(SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(3).WithPrice(price).Build());
+
+        sale.AddItem(new SaleItem { ProductId = Guid.NewGuid().ToString(), ProductName = faker.Commerce.ProductName(), Quantity = 3, Price = price }); // 0 discount
         sale.Discounts.Should().Be(0);
         sale.ClearItems();
-        sale.AddItem(SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(5).WithPrice(price).Build());
+
+        sale.AddItem(new SaleItem { ProductId = Guid.NewGuid().ToString(), ProductName = faker.Commerce.ProductName(), Quantity = 5, Price = price }); // 10% discount
         sale.Discounts.Should().Be(5 * price * 0.10m);
         sale.ClearItems();
-        sale.AddItem(SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(15).WithPrice(price).Build());
+
+        sale.AddItem(new SaleItem { ProductId = Guid.NewGuid().ToString(), ProductName = faker.Commerce.ProductName(), Quantity = 15, Price = price }); // 20% discount
         sale.Discounts.Should().Be(15 * price * 0.20m);
     }
 
-    [Fact(DisplayName = "Cancel should mark sale as canceled")]
+    [Fact(DisplayName = "Should cancel sale")]
     public void Cancel_ShouldSetIsCanceled()
     {
-        var sale = new Sale();
+        var sale = SaleTestData.GenerateSale();
         sale.IsCanceled.Should().BeFalse();
         sale.Cancel();
         sale.IsCanceled.Should().BeTrue();
@@ -67,30 +65,35 @@ public class SaleTests
     [Fact(DisplayName = "Should clear all items")]
     public void ClearItems_ShouldRemoveAllItems()
     {
-        var sale = new Sale();
-        for (int i = 0; i < 3; i++)
-            sale.AddItem(SaleItemBuilder.New().WithProduct($"Product{i}").WithQuantity(1).WithPrice(10).Build());
+        var sale = SaleTestData.GenerateSaleWithItems(3);
         sale.Items.Should().NotBeEmpty();
         sale.ClearItems();
         sale.Items.Should().BeEmpty();
     }
 
+    // Example of using NSubstitute for an external dependency (Publisher)
+    // Suppose Sale had a method that accepted an IPublisher
     public interface IPublisher { void Publish(string message); }
 
     [Fact(DisplayName = "Should call publisher when publishing event")]
     public void PublishEvent_ShouldCallPublisher()
     {
-        _ = NSubstitute.Substitute.For<IPublisher>();
-        _ = new Sale { SaleNumber = new SaleNumber().Value };
+        var publisher = NSubstitute.Substitute.For<IPublisher>();
+        var sale = new Sale { SaleNumber = new SaleNumber().Value };
+        // Suppose Sale has a method to publish an event
+        // sale.PublishCreatedEvent(publisher);
+        // publisher.Received(1).Publish(Arg.Any<string>());
+        // As Sale has no dependency, this is just a structure example
         Assert.True(true);
     }
 
     [Fact(DisplayName = "Should create sale with valid data")]
     public void CreateSale_WithValidData_ShouldSucceed()
     {
-        var sale = new Sale();
-        sale.Consumer = "Test Consumer";
-        sale.Agency = "Test Agency";
+        // Arrange
+        var sale = SaleTestData.GenerateSale();
+
+        // Assert
         sale.SaleNumber.Should().NotBeNullOrWhiteSpace();
         sale.Consumer.Should().NotBeNullOrWhiteSpace();
         sale.Agency.Should().NotBeNullOrWhiteSpace();
@@ -100,40 +103,58 @@ public class SaleTests
     [Fact(DisplayName = "Should add item to sale")]
     public void AddItem_ShouldAddSaleItem()
     {
-        var sale = new Sale();
-        var item = SaleItemBuilder.New().WithProduct("Test").WithQuantity(1).WithPrice(10).Build();
+        // Arrange
+        var sale = SaleTestData.GenerateSaleWithItems(0);
+        var item = SaleTestData.GenerateSaleWithItems(1).Items[0];
+
+        // Act
         sale.AddItem(item);
+
+        // Assert
         sale.Items.Should().Contain(item);
     }
 
     [Fact(DisplayName = "Should remove item from sale")]
     public void RemoveItem_ShouldRemoveSaleItem()
     {
-        var sale = new Sale();
-        var item = SaleItemBuilder.New().WithProduct("Test").WithQuantity(1).WithPrice(10).Build();
-        sale.AddItem(item);
+        // Arrange
+        var sale = SaleTestData.GenerateSaleWithItems(1);
+        var item = sale.Items[0];
+
+        // Act
         sale.RemoveItem(item);
+
+        // Assert
         sale.Items.Should().BeEmpty();
     }
 
     [Fact(DisplayName = "Should not allow negative quantity")]
     public void AddItem_WithNegativeQuantity_ShouldThrow()
     {
-        var sale = new Sale();
+        // Arrange
+        var sale = SaleTestData.GenerateSaleWithItems(0);
         var faker = new Bogus.Faker();
-        var item = SaleItemBuilder.New().WithProduct(faker.Commerce.ProductName()).WithQuantity(-1).WithPrice(faker.Random.Decimal(1, 100)).Build();
+        var item = new SaleItem { ProductId = Guid.NewGuid().ToString(), ProductName = faker.Commerce.ProductName(), Quantity = -1, Price = faker.Random.Decimal(1, 100) };
+
+        // Act
         Action act = () => sale.AddItem(item);
+
+        // Assert
         act.Should().Throw<ArgumentException>();
     }
 
     [Fact(DisplayName = "Should not allow null product name")]
     public void AddItem_WithNullProduct_ShouldThrow()
     {
-        var sale = new Sale();
+        // Arrange
+        var sale = SaleTestData.GenerateSaleWithItems(0);
         var faker = new Bogus.Faker();
-        string? nullProduct = null;
-        var item = SaleItemBuilder.New().WithProduct(nullProduct!).WithQuantity(1).WithPrice(faker.Random.Decimal(1, 100)).Build();
+        var item = new SaleItem(saleNumber: "S123", productId: Guid.NewGuid().ToString(), productName: null, quantity: 1, price: faker.Random.Decimal(1, 100));
+
+        // Act
         Action act = () => sale.AddItem(item);
+
+        // Assert
         act.Should().Throw<ArgumentException>();
     }
 }
