@@ -35,16 +35,19 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Creat
         var saleItems = _mapper.Map<List<SaleItem>>(command.Items);
         foreach (var saleItem in saleItems)
         {
+            saleItem.SaleNumber = sale.SaleNumber;
+
+            //it may be another external system generating the product id
+            saleItem.ProductId = Guid.NewGuid().ToString();
             sale.AddItem(saleItem);
         }
 
         await _saleRepository.AddAsync(sale, cancellationToken);
 
-
-    var saleCreatedEvent = new SaleCreatedEvent(sale);
-    var integrationEvent = new SaleCreatedIntegrationEvent(sale);
-    await _mediator.Publish(integrationEvent, cancellationToken);
-    await _eventDispatcher.DispatchAsync(saleCreatedEvent, cancellationToken);
+        var saleCreatedEvent = new SaleCreatedEvent(sale);
+        var integrationEvent = new SaleCreatedIntegrationEvent(sale);
+        await _mediator.Publish(integrationEvent, cancellationToken);
+        await _eventDispatcher.DispatchAsync(saleCreatedEvent, cancellationToken);
 
         return _mapper.Map<CreateSaleResult>(sale);
     }

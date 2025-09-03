@@ -118,11 +118,18 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                             b1.Property<decimal>("Price")
                                 .HasColumnType("numeric");
 
-                            b1.Property<string>("Product")
+                            b1.Property<string>("ProductId")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("ProductName")
                                 .HasColumnType("text");
 
                             b1.Property<int>("Quantity")
                                 .HasColumnType("integer");
+
+                            b1.Property<string>("SaleNumber")
+                                .IsRequired()
+                                .HasColumnType("text");
 
                             b1.HasKey("SaleId", "Id");
 

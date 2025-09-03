@@ -27,7 +27,9 @@ public static class SaleTestData
         return sale;
     }
     private static readonly Faker<SaleItem> itemFaker = new Faker<SaleItem>()
-        .RuleFor(i => i.Product, f => f.Commerce.ProductName())
+        .RuleFor(i => i.SaleNumber, f => new SaleNumber().Value)
+        .RuleFor(i => i.ProductId, f => Guid.NewGuid().ToString())
+        .RuleFor(i => i.ProductName, f => f.Commerce.ProductName())
         .RuleFor(i => i.Quantity, f => f.Random.Int(1, 20))
         .RuleFor(i => i.Price, f => f.Random.Decimal(1, 100));
     private static readonly Faker<Sale> saleFaker = new Faker<Sale>()
@@ -75,6 +77,7 @@ public static class SaleTestData
     {
         var sale = saleFaker.Generate();
         sale.ClearItems();
+
         for (int i = 0; i < itemCount; i++)
             sale.AddItem(itemFaker.Generate());
         return sale;

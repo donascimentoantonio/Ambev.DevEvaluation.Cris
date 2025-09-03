@@ -15,10 +15,13 @@ public class SaleIntegrationTests
     [Fact(DisplayName = "Should return sales ordered by Consumer desc, SaleDate asc")]
     public async Task GetAllAsync_OrdersByMultipleFields()
     {
+
         var options = new DbContextOptionsBuilder<DefaultContext>()
             .UseInMemoryDatabase(databaseName: "SaleOrderTestDb")
             .Options;
+
         using var context = new DefaultContext(options);
+        
         var sales = new List<Sale>
         {
             SaleTestData.GenerateCustomSale("Carlos", new DateTime(2024, 1, 1)),
@@ -27,8 +30,10 @@ public class SaleIntegrationTests
             SaleTestData.GenerateCustomSale("Carlos", new DateTime(2024, 1, 2)),
             SaleTestData.GenerateCustomSale("Ana", new DateTime(2024, 1, 1)),
         };
+        
         context.Sales.AddRange(sales);
         context.SaveChanges();
+        
         var saleRepository = new SaleRepository(context);
         var result = await saleRepository.GetAllAsync(
             pageNumber: 1,
@@ -39,6 +44,7 @@ public class SaleIntegrationTests
             agency: null,
             cancellationToken: default
         );
+        
         Assert.Equal(5, result.Count);
         Assert.Equal("Carlos", result[0].Consumer);
         Assert.Equal(new DateTime(2024, 1, 1), result[0].SaleDate);
@@ -54,6 +60,7 @@ public class SaleIntegrationTests
     [Fact(DisplayName = "Should create sale and persist to database")]
     public async Task CreateSale_FullFlow_PersistsSale()
     {
+        //Arrange
         var options = new DbContextOptionsBuilder<DefaultContext>()
             .UseInMemoryDatabase(databaseName: "SaleIntegrationTestDb")
             .Options;
@@ -74,18 +81,20 @@ public class SaleIntegrationTests
         var handler = new CreateSaleCommandHandler(saleRepository, mapper, mediator, eventDispatcher);
         var items = new List<SaleItem> {
             SaleItemBuilder.New()
-                .WithProduct("Product X")
+                .WithProductName("Product X")
                 .WithQuantity(2)
                 .WithPrice(50m)
                 .Build()
         };
 
+        //Act
         var command = CreateSaleCommandBuilder.New()
             .WithConsumer("John Doe")
             .WithAgency("Agency Y")
             .WithItems(items)
             .Build();
 
+        //Assert
         var result = await handler.Handle(command, default);
         Assert.NotNull(result);
         Assert.Equal("John Doe", result.Consumer);
@@ -94,6 +103,6 @@ public class SaleIntegrationTests
         Assert.Equal("John Doe", persistedSale.Consumer);
         Assert.Equal("Agency Y", persistedSale.Agency);
         Assert.Single(persistedSale.Items);
-        Assert.Equal("Product X", persistedSale.Items.First().Product);
+        Assert.Equal("Product X", persistedSale.Items.First().ProductName);
     }
 }

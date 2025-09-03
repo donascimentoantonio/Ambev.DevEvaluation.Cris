@@ -17,7 +17,7 @@ public class Sale : BaseEntity
     /// </summary>
     public void RemoveItem(SaleItem item)
     {
-        if (item == null) throw new ArgumentNullException(nameof(item));
+        ArgumentNullException.ThrowIfNull(item);
         _items.Remove(item);
 
     }
@@ -110,12 +110,12 @@ public class Sale : BaseEntity
             throw new ArgumentNullException(nameof(item));
         if (item.Quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(item.Quantity));
-        if (string.IsNullOrWhiteSpace(item.Product))
-            throw new ArgumentException("Product name cannot be null or empty.", nameof(item.Product));
+        if (string.IsNullOrWhiteSpace(item.ProductId))
+            throw new ArgumentException("Product name cannot be null or empty.", nameof(item.ProductId));
         if (item.Quantity > 20)
             throw new InvalidOperationException("Cannot sell more than 20 identical items.");
 
-        var existingItem = _items.FirstOrDefault(i => i.Product == item.Product);
+        var existingItem = _items.FirstOrDefault(i => i.ProductId == item.ProductId);
 
         if (existingItem != null)
         {
