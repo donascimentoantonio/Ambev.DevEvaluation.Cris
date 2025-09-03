@@ -6,20 +6,13 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities;
 public class Sale : BaseEntity
 {
     /// <summary>
-    /// Removes an item from the sale.
-    /// </summary>
-    /// <summary>
     /// Unique order identifier.
     /// </summary>
-    public string SaleNumber { get; set; } = string.Empty;
-    /// <summary>
-    /// Removes an item from the sale.
-    /// </summary>
-    public void RemoveItem(SaleItem item)
+    public string SaleNumber { get; set; }
+    public Sale()
     {
         ArgumentNullException.ThrowIfNull(item);
         _items.Remove(item);
-
     }
 
 
@@ -51,9 +44,6 @@ public class Sale : BaseEntity
     /// List of items in the sale (read-only).
     /// </summary>
     public IReadOnlyList<SaleItem> Items => _items.AsReadOnly();
-    /// <summary>
-    /// Parameterless constructor required by Entity Framework Core.
-    /// </summary>
 
     /// <summary>
     /// Total value of the sale.
@@ -106,12 +96,13 @@ public class Sale : BaseEntity
     public void AddItem(SaleItem item)
     {
 
-        if (item == null)
-            throw new ArgumentNullException(nameof(item));
+        ArgumentNullException.ThrowIfNull(item);
         if (item.Quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(item.Quantity));
+
         if (string.IsNullOrWhiteSpace(item.ProductId))
             throw new ArgumentException("Product name cannot be null or empty.", nameof(item.ProductId));
+            
         if (item.Quantity > 20)
             throw new InvalidOperationException("Cannot sell more than 20 identical items.");
 
@@ -143,5 +134,19 @@ public class Sale : BaseEntity
     /// Cancels the sale.
     /// </summary>
     public void Cancel() => IsCanceled = true;
+
+    /// <summary>
+    /// Reverses the cancelation of the sale.
+    /// </summary>
+    public void Reactivate() => IsCanceled = false;
+
+    /// <summary>
+    /// Removes a specific item from the sale.
+    /// </summary>
+    public void RemoveItem(SaleItem item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        _items.Remove(item);
+    }
 }
 

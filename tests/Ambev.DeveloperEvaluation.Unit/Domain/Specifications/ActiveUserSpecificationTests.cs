@@ -6,6 +6,9 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Specifications
 {
+        /// <summary>
+        /// Contains unit tests for the <see cref="ActiveUserSpecification"/> class.
+        /// </summary>
     public class ActiveUserSpecificationTests
     {
         [Theory]
